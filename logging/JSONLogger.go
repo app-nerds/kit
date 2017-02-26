@@ -19,7 +19,7 @@ type JSONLogger struct {
 NewJSONLogger returns an instance of an ILogger interface
 set to the JSON logger format
 */
-func NewJSONLogger(applicationName string, minimumLogLevel LogType) ILogger {
+func NewJSONLogger(applicationName string, minimumLogLevel LogType) *JSONLogger {
 	return &JSONLogger{
 		Logger: Logger{
 			ApplicationName: applicationName,
