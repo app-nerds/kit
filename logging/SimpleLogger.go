@@ -17,7 +17,7 @@ type SimpleLogger struct {
 NewSimpleLogger returns an instance of an ILogger interface
 set to the simple logger format
 */
-func NewSimpleLogger(applicationName string, minimumLogLevel LogType) ILogger {
+func NewSimpleLogger(applicationName string, minimumLogLevel LogType) *SimpleLogger {
 	return &SimpleLogger{
 		Logger: Logger{
 			ApplicationName: applicationName,
