@@ -110,7 +110,7 @@ func (l *GoLayout) RenderViewFilef(ctx echo.Context, fileName string, context in
 		return errors.Wrapf(err, "Unable to render the view file %s", fileName)
 	}
 
-	ctx.String(http.StatusOK, renderedContents)
+	ctx.HTML(http.StatusOK, renderedContents)
 	return nil
 }
 
@@ -149,6 +149,6 @@ func (l *GoLayout) RenderViewStringf(ctx echo.Context, contents []byte, context 
 		return errors.Wrap(err, "Unable to render the view")
 	}
 
-	ctx.String(http.StatusOK, renderedContents)
+	ctx.HTML(http.StatusOK, renderedContents)
 	return nil
 }
