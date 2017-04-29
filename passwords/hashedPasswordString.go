@@ -16,9 +16,9 @@ be stored in a database.
 */
 type HashedPasswordString string
 
-func (hp HashedPasswordString) Set(password string) {
-	result, _ := HashPassword(password)
-	hp = HashedPasswordString(result)
+func (hp HashedPasswordString) Hash() HashedPasswordString {
+	result, _ := HashPassword(string(hp))
+	return HashedPasswordString(result)
 }
 
 func (hp HashedPasswordString) IsSameAsPlaintextPassword(plaintextPassword string) bool {
