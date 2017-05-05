@@ -14,6 +14,7 @@ import (
 	"html/template"
 	"io/ioutil"
 	"net/http"
+	"reflect"
 
 	"github.com/labstack/echo"
 	"github.com/pkg/errors"
@@ -34,6 +35,21 @@ func (l *GoLayout) addHelperFunctions() {
 		},
 		"neq": func(a, b interface{}) bool {
 			return a != b
+		},
+		"arrayContainsString": func(array, value interface{}) bool {
+			result := false
+			iter := reflect.ValueOf(array)
+
+			if iter.IsValid() {
+				for i := 0; i < iter.Len(); i++ {
+					if iter.Index(i).String() == value.(string) {
+						result = true
+						break
+					}
+				}
+			}
+
+			return result
 		},
 	}
 
