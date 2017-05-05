@@ -12,7 +12,7 @@ package env_test
 import (
 	"os"
 
-	. "bitbucket.org/appninjas/kit/env"
+	. "gitlab.appninjas.biz/appninjas/kit/env"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"

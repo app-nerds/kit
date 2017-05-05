@@ -10,7 +10,7 @@ Unless required by applicable law or agreed to in writing, software distributed 
 package logging_test
 
 import (
-	. "bitbucket.org/appninjas/kit/logging"
+	. "gitlab.appninjas.biz/appninjas/kit/logging"
 
 	. "github.com/onsi/ginkgo"
 	. "github.com/onsi/gomega"
