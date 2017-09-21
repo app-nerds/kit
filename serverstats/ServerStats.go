@@ -2,7 +2,6 @@ package serverstats
 
 import (
 	"container/ring"
-	"fmt"
 	"net/http"
 	"strconv"
 	"sync"
@@ -47,7 +46,6 @@ func (s *ServerStats) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		s.ResponseTimes = s.ResponseTimes.Next()
 		s.ResponseTimes.Value = endTime
-		fmt.Printf("response time: %d\n\n", endTime)
 
 		status := strconv.Itoa(ctx.Response().Status)
 		s.Statuses[status]++
