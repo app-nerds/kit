@@ -21,6 +21,10 @@ func (hp HashedPasswordString) Hash() HashedPasswordString {
 	return HashedPasswordString(result)
 }
 
+func (hp HashedPasswordString) IsEmpty() bool {
+	return len(hp) == 0
+}
+
 func (hp HashedPasswordString) IsSameAsPlaintextPassword(plaintextPassword string) bool {
 	return IsPasswordValid(string(hp), plaintextPassword)
 }
