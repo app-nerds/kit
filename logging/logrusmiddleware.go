@@ -120,7 +120,7 @@ func (l *LogrusMiddleware) logrusMiddlewareHandler(ctx echo.Context, next echo.H
 	}
 
 	l.logger.WithFields(map[string]interface{}{
-		"time_rfc3339":  time.Now().Format(time.RFC3339),
+		"time":          time.Now().Format(time.RFC3339),
 		"remote_ip":     ctx.RealIP(),
 		"uri":           request.RequestURI,
 		"method":        request.Method,
