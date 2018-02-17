@@ -94,7 +94,7 @@ func (l MiddlewareLogger) Panicj(j log.JSON) {
 }
 
 type LogrusMiddleware struct {
-	logger *logrus.Entry
+	logger *logrus.Logger
 }
 
 func (l *LogrusMiddleware) logrusMiddlewareHandler(ctx echo.Context, next echo.HandlerFunc) error {
@@ -140,7 +140,15 @@ func (l *LogrusMiddleware) middleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 func Hook() echo.MiddlewareFunc {
 	l := &LogrusMiddleware{
-		logger: logrus.New().WithField("who", "Request Logger"),
+		logger: logrus.New().WithField("who", "Request Logger").Logger,
+	}
+
+	return l.middleware
+}
+
+func HookWithLogger(existingLogger *logrus.Logger) echo.MiddlewareFunc {
+	l := &LogrusMiddleware{
+		logger: existingLogger,
 	}
 
 	return l.middleware
@@ -148,7 +156,7 @@ func Hook() echo.MiddlewareFunc {
 
 func HookWithExisting(existingLogger *logrus.Entry) echo.MiddlewareFunc {
 	l := &LogrusMiddleware{
-		logger: existingLogger,
+		logger: existingLogger.Logger,
 	}
 
 	return l.middleware
