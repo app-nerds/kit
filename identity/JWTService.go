@@ -43,7 +43,7 @@ type JWTService struct {
 CreateToken creates a new JWT token for use in
 MailSlurper services
 */
-func (s *JWTService) CreateToken(authSecret, userID, userName string) (string, error) {
+func (s *JWTService) CreateToken(authSecret, userID, userName string, additionalData map[string]interface{}) (string, error) {
 	claims := &Claims{
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(time.Minute * time.Duration(s.TimeoutInMinutes)).Unix(),
@@ -51,6 +51,10 @@ func (s *JWTService) CreateToken(authSecret, userID, userName string) (string, e
 		},
 		UserID:   userID,
 		UserName: userName,
+	}
+
+	if additionalData != nil {
+		claims.AdditionalData = additionalData
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)

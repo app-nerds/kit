@@ -17,6 +17,7 @@ var ErrInvalidIssuer error = fmt.Errorf("Invalid issuer")
 
 type Claims struct {
 	jwt.StandardClaims
-	UserID   string `json:"userID"`
-	UserName string `json:"userName"`
+	UserID         string `json:"userID"`
+	UserName       string `json:"userName"`
+	AdditionalData map[string]interface{}
 }
