@@ -10,6 +10,12 @@ import (
 	"github.com/labstack/echo"
 )
 
+/*
+ServerStats tracks general server statistics. This includes information
+about uptime, response times and counts, and requests counts broken
+down by HTTP status code. ServerStats is thread-safe due to a
+write lock on requests, and a read lock on reads
+*/
 type ServerStats struct {
 	Uptime        time.Time `json:"uptime"`
 	RequestCount  uint64    `json:"requestCount"`
@@ -19,6 +25,9 @@ type ServerStats struct {
 	mutex sync.RWMutex
 }
 
+/*
+NewServerStats creates a new ServerStats object
+*/
 func NewServerStats() *ServerStats {
 	return &ServerStats{
 		Uptime:        time.Now().UTC(),
@@ -27,6 +36,10 @@ func NewServerStats() *ServerStats {
 	}
 }
 
+/*
+Middleware is used to capture request and response stats. This is designed
+to be used with the Echo framework
+*/
 func (s *ServerStats) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		var err error
@@ -54,6 +67,10 @@ func (s *ServerStats) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 	}
 }
 
+/*
+Handler is an endpoint handler you can plug into your application
+to return stat data
+*/
 func (s *ServerStats) Handler(ctx echo.Context) error {
 	s.mutex.RLock()
 	defer s.mutex.RUnlock()

@@ -15,3 +15,6 @@ httpServer.Use(serverStats.Middleware)
 
 httpServer.GET("/serverstats", serverStats.Handler)
 ```
+
+The ServerStats object satifies the IServerStats interface, allowing developers to implement
+their own statistics.
