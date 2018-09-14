@@ -2,7 +2,6 @@ package serverstats
 
 import (
 	"container/ring"
-	"fmt"
 	"net/http"
 	"strconv"
 	"sync"
@@ -70,10 +69,7 @@ func (s *ServerStats) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 		s.Statuses[status]++
 
 		if s.customMiddleware != nil {
-			fmt.Printf("\nWe have a custom middleware\n")
 			s.customMiddleware(ctx, s)
-		} else {
-			fmt.Printf("\n We DON'T have a custom middleware\n")
 		}
 
 		return nil
