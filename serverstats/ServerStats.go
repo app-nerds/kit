@@ -2,6 +2,7 @@ package serverstats
 
 import (
 	"container/ring"
+	"fmt"
 	"net/http"
 	"strconv"
 	"sync"
@@ -17,10 +18,13 @@ down by HTTP status code. ServerStats is thread-safe due to a
 write lock on requests, and a read lock on reads
 */
 type ServerStats struct {
-	Uptime        time.Time `json:"uptime"`
-	RequestCount  uint64    `json:"requestCount"`
+	CustomStats   map[string]interface{} `json:"customStats"`
+	Uptime        time.Time              `json:"uptime"`
+	RequestCount  uint64                 `json:"requestCount"`
 	ResponseTimes *ring.Ring
 	Statuses      map[string]int `json:"statuses"`
+
+	customMiddleware func(ctx echo.Context, serverStats *ServerStats)
 
 	mutex sync.RWMutex
 }
@@ -28,11 +32,13 @@ type ServerStats struct {
 /*
 NewServerStats creates a new ServerStats object
 */
-func NewServerStats() *ServerStats {
+func NewServerStats(customMiddleware func(ctx echo.Context, serverStats *ServerStats)) *ServerStats {
 	return &ServerStats{
-		Uptime:        time.Now().UTC(),
-		ResponseTimes: ring.New(1000),
-		Statuses:      make(map[string]int),
+		customMiddleware: customMiddleware,
+		CustomStats:      make(map[string]interface{}),
+		Uptime:           time.Now().UTC(),
+		ResponseTimes:    ring.New(1000),
+		Statuses:         make(map[string]int),
 	}
 }
 
@@ -63,6 +69,13 @@ func (s *ServerStats) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 		status := strconv.Itoa(ctx.Response().Status)
 		s.Statuses[status]++
 
+		if s.customMiddleware != nil {
+			fmt.Printf("\nWe have a custom middleware\n")
+			s.customMiddleware(ctx, s)
+		} else {
+			fmt.Printf("\n We DON'T have a custom middleware\n")
+		}
+
 		return nil
 	}
 }
@@ -92,16 +105,18 @@ func (s *ServerStats) Handler(ctx echo.Context) error {
 	}
 
 	result := struct {
-		AverageResponseTimeInNanoseconds  int64          `json:"averageResponseTimeInNanoseconds"`
-		AverageResponseTimeInMicroseconds int64          `json:"averageResponseTimeInMicroseconds"`
-		AverageResponseTimeInMilliseconds int64          `json:"averageResponseTimeInMilliseconds"`
-		ServerStartTime                   time.Time      `json:"serverStartTime"`
-		RequestCount                      uint64         `json:"requestCount"`
-		Statuses                          map[string]int `json:"statuses"`
+		AverageResponseTimeInNanoseconds  int64                  `json:"averageResponseTimeInNanoseconds"`
+		AverageResponseTimeInMicroseconds int64                  `json:"averageResponseTimeInMicroseconds"`
+		AverageResponseTimeInMilliseconds int64                  `json:"averageResponseTimeInMilliseconds"`
+		CustomStats                       map[string]interface{} `json:"customStats"`
+		ServerStartTime                   time.Time              `json:"serverStartTime"`
+		RequestCount                      uint64                 `json:"requestCount"`
+		Statuses                          map[string]int         `json:"statuses"`
 	}{
 		AverageResponseTimeInNanoseconds:  averageResponseTime,
 		AverageResponseTimeInMicroseconds: averageResponseTime / 1000,
 		AverageResponseTimeInMilliseconds: averageResponseTime / 1000 / 1000,
+		CustomStats:                       s.CustomStats,
 		ServerStartTime:                   s.Uptime,
 		RequestCount:                      s.RequestCount,
 		Statuses:                          s.Statuses,
