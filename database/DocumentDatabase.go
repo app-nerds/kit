@@ -13,4 +13,5 @@ type DocumentDatabase interface {
 
 	GetCollection(name string) *mgo.Collection
 	GetDB() *mgo.Database
+	GridFS(prefix string) *mgo.GridFS
 }

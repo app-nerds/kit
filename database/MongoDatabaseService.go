@@ -35,3 +35,7 @@ func (d *MongoDatabaseService) GetCollection(name string) *mgo.Collection {
 func (d *MongoDatabaseService) GetDB() *mgo.Database {
 	return d.DB
 }
+
+func (d *MongoDatabaseService) GridFS(prefix string) *mgo.GridFS {
+	return d.DB.GridFS(prefix)
+}

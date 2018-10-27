@@ -10,7 +10,7 @@ MongoCollection is an interface describing MongoDB collection methods
 type MongoCollection interface {
 	Count() (int, error)
 	EnsureIndex(index mgo.Index) error
-	Find(query interface{}) *mgo.Query
+	Find(query interface{}) *MongoQueryWrapper
 	FindId(id interface{}) *mgo.Query
 	Insert(docs ...interface{}) error
 	Remove(selector interface{}) error

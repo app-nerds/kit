@@ -18,6 +18,6 @@ type MongoQuery interface {
 	Sort(fields ...string) MongoQuery
 }
 
-type MongoQueryImpl struct {
+type MongoQueryWrapper struct {
 	*mgo.Query
 }
