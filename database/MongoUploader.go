@@ -15,7 +15,7 @@ A MongoUploader uploads files to a MongoDB database. This struct
 satisfies the DatabaseUploader interface
 */
 type MongoUploader struct {
-	DB *mgo.Database
+	DB DocumentDatabase
 }
 
 /*
