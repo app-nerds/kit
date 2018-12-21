@@ -145,7 +145,6 @@ Shutdown closes the job queue and waits for current workers to finish
 */
 func (p *Pool) Shutdown() {
 	p.shutdownChannel <- true
-	close(p.jobQueue)
 }
 
 /*
