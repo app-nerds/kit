@@ -1,6 +1,6 @@
 /*
-Copyright 2018 AppNinjas, LLC
-Use of this package is governed by the MIT license
+Copyright 2018-2019 AppNinjas LLC. All rights reserved
+Use of this source code is governed by the MIT license.
 
 Package workerpool implements a pool of workers (goroutines) who
 can perform jobs. Below is an example of a pool that has

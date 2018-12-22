@@ -1,3 +1,5 @@
+// Copyright 2018-2019 AppNinjas LLC. All rights reserved
+// Use of this source code is governed by the MIT license.
 package workerpool
 
 import "sync"
