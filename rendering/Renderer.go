@@ -22,7 +22,7 @@ type IRenderer interface {
 Renderer implements the Echo renderer and IRenderer interfaces
 */
 type Renderer struct {
-	templates *template.Template
+	templates map[string]*template.Template
 }
 
 /*
@@ -41,7 +41,7 @@ empty set of templates
 */
 func NewRenderer() *Renderer {
 	return &Renderer{
-		templates: template.New("root-renderer"),
+		templates: make(map[string]*template.Template),
 	}
 }
 
@@ -52,7 +52,7 @@ cache
 func (r *Renderer) AddTemplateWithLayout(templateItem *TemplateItem) error {
 	var err error
 
-	t := r.templates.New(templateItem.Name)
+	t := template.New(templateItem.Name)
 
 	if t, err = t.Parse(templateItem.LayoutContent); err != nil {
 		return errors.Wrapf(err, "Error parsing layout while attempting to add template %s", templateItem.Name)
@@ -62,6 +62,7 @@ func (r *Renderer) AddTemplateWithLayout(templateItem *TemplateItem) error {
 		return errors.Wrapf(err, "Error parsing page while attempting to add template %s", templateItem.Name)
 	}
 
+	r.templates[templateItem.Name] = t
 	return nil
 }
 
@@ -84,7 +85,7 @@ func (r *Renderer) AddTemplatesWithLayout(templateItems ...*TemplateItem) error 
 Render renders a template by name to the supplied writer
 */
 func (r *Renderer) Render(w io.Writer, name string, data interface{}, ctx echo.Context) error {
-	err := r.templates.ExecuteTemplate(w, name, data)
+	err := r.templates[name].Execute(w, data)
 
 	if err != nil {
 		fmt.Printf("\nError rendering template %s: %s\n", name, err.Error())
