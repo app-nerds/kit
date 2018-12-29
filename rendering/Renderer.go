@@ -5,6 +5,8 @@ import (
 	"io"
 	"reflect"
 
+	"code.appninjas.biz/appninjas/kit/datetime"
+	"code.appninjas.biz/appninjas/kit/sanitizer"
 	"github.com/labstack/echo"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
@@ -23,8 +25,10 @@ type IRenderer interface {
 Renderer implements the Echo renderer and IRenderer interfaces
 */
 type Renderer struct {
-	logger    *logrus.Entry
-	templates map[string]*template.Template
+	dateTimeParser datetime.IDateTimeParser
+	logger         *logrus.Entry
+	templates      map[string]*template.Template
+	xssSanitizer   sanitizer.IXSSServiceProvider
 }
 
 /*
@@ -43,19 +47,21 @@ empty set of templates
 */
 func NewRenderer(logger *logrus.Entry) *Renderer {
 	return &Renderer{
-		logger:    logger,
-		templates: make(map[string]*template.Template),
+		dateTimeParser: &datetime.DateTimeParser{},
+		logger:         logger,
+		templates:      make(map[string]*template.Template),
+		xssSanitizer:   sanitizer.NewXSSService(),
 	}
 }
 
 func (r *Renderer) addHelperFunctions(t *template.Template) *template.Template {
 	var funcMap = template.FuncMap{
-		"eq": func(a, b interface{}) bool {
-			return a == b
-		},
-		"neq": func(a, b interface{}) bool {
-			return a != b
-		},
+		// "eq": func(a, b interface{}) bool {
+		// 	return a == b
+		// },
+		// "neq": func(a, b interface{}) bool {
+		// 	return a != b
+		// },
 		"arrayContainsString": func(array, value interface{}) bool {
 			result := false
 			iter := reflect.ValueOf(array)
@@ -71,9 +77,15 @@ func (r *Renderer) addHelperFunctions(t *template.Template) *template.Template {
 
 			return result
 		},
+		"toUSDateTime": r.dateTimeParser.ToUSDateTime,
+		"toUSDate":     r.dateTimeParser.ToUSDate,
+		"toUSTime":     r.dateTimeParser.ToUSTime,
+		"toSQLString":  r.dateTimeParser.ToSQLString,
+		"toISO8601":    r.dateTimeParser.ToISO8601,
+		"sanitize":     r.xssSanitizer.SanitizeString,
 	}
 
-	t.Funcs(funcMap)
+	t = t.Funcs(funcMap)
 	return t
 }
 
@@ -85,6 +97,7 @@ func (r *Renderer) AddTemplateWithLayout(templateItem *TemplateItem) error {
 	var err error
 
 	t := template.New(templateItem.Name)
+	t = r.addHelperFunctions(t)
 
 	if t, err = t.Parse(templateItem.LayoutContent); err != nil {
 		return errors.Wrapf(err, "Error parsing layout while attempting to add template %s", templateItem.Name)
@@ -94,7 +107,6 @@ func (r *Renderer) AddTemplateWithLayout(templateItem *TemplateItem) error {
 		return errors.Wrapf(err, "Error parsing page while attempting to add template %s", templateItem.Name)
 	}
 
-	t = r.addHelperFunctions(t)
 	r.templates[templateItem.Name] = t
 	return nil
 }
@@ -118,6 +130,7 @@ func (r *Renderer) AddTemplatesWithLayout(templateItems ...*TemplateItem) error 
 Render renders a template by name to the supplied writer
 */
 func (r *Renderer) Render(w io.Writer, name string, data interface{}, ctx echo.Context) error {
+
 	err := r.templates[name].ExecuteTemplate(w, name, data)
 
 	if err != nil {
