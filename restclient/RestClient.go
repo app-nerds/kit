@@ -38,11 +38,14 @@ are useful for POST and PUT operations
 */
 type HTTPParameters map[string]string
 
+// EmptyHTTPParameters is a blank HTTPParameters map
+var EmptyHTTPParameters = make(HTTPParameters)
+
 /*
 BuildURL takes a query and builds a full URL
 */
 func (c *RestClient) BuildURL(query string) string {
-	return fmt.Sprintf("%s/%s", c.BaseURL, query)
+	return fmt.Sprintf("%s%s", c.BaseURL, query)
 }
 
 /*
