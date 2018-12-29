@@ -11,6 +11,9 @@ type IDateTimeParser interface {
 	IsDateOlderThanNumDaysAgo(t time.Time, numDays int) bool
 	ToISO8601(t time.Time) string
 	ToSQLString(t time.Time) string
+	ToUSDate(t time.Time) string
+	ToUSDateTime(t time.Time) string
+	ToUSTime(t time.Time) string
 	Parse(dateString string) (time.Time, error)
 	ParseDateTime(dateString string) time.Time
 	ParseISO8601(dateString string) time.Time
@@ -47,6 +50,18 @@ func (service *DateTimeParser) ToISO8601(t time.Time) string {
 
 func (service *DateTimeParser) ToSQLString(t time.Time) string {
 	return t.Format("2006-01-02 15:04:05")
+}
+
+func (service *DateTimeParser) ToUSDate(t time.Time) string {
+	return t.Format("01/02/2006")
+}
+
+func (service *DateTimeParser) ToUSDateTime(t time.Time) string {
+	return t.Format("01/02/2006 3:04 PM")
+}
+
+func (service *DateTimeParser) ToUSTime(t time.Time) string {
+	return t.Format("3:04 PM")
 }
 
 func (service *DateTimeParser) NowUTC() time.Time {
