@@ -1,6 +1,7 @@
 package rendering
 
 import (
+	"fmt"
 	"html/template"
 	"io"
 	"reflect"
@@ -124,6 +125,12 @@ func (r *Renderer) AddTemplatesWithLayout(templateItems ...*TemplateItem) error 
 Render renders a template by name to the supplied writer
 */
 func (r *Renderer) Render(w io.Writer, name string, data interface{}, ctx echo.Context) error {
+	var ok bool
+
+	if _, ok = r.templates[name]; !ok {
+		fmt.Printf("\nTemplate %s not found\n", name)
+		return errors.New("Template " + name + " not found")
+	}
 
 	err := r.templates[name].ExecuteTemplate(w, name, data)
 
