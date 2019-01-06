@@ -56,12 +56,6 @@ func NewRenderer(logger *logrus.Entry) *Renderer {
 
 func (r *Renderer) addHelperFunctions(t *template.Template) *template.Template {
 	var funcMap = template.FuncMap{
-		// "eq": func(a, b interface{}) bool {
-		// 	return a == b
-		// },
-		// "neq": func(a, b interface{}) bool {
-		// 	return a != b
-		// },
 		"arrayContainsString": func(array, value interface{}) bool {
 			result := false
 			iter := reflect.ValueOf(array)
