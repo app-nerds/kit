@@ -78,6 +78,18 @@ func (r *Renderer) addHelperFunctions(t *template.Template) *template.Template {
 		"toSQLString":  r.dateTimeParser.ToSQLString,
 		"toISO8601":    r.dateTimeParser.ToISO8601,
 		"sanitize":     r.xssSanitizer.SanitizeString,
+		"intLT": func(value1, value2 int) bool {
+			return value1 < value2
+		},
+		"intLTE": func(value1, value2 int) bool {
+			return value1 <= value2
+		},
+		"intGT": func(value1, value2 int) bool {
+			return value1 > value2
+		},
+		"intGTE": func(value1, value2 int) bool {
+			return value1 >= value2
+		},
 	}
 
 	t = t.Funcs(funcMap)
