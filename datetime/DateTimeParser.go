@@ -19,10 +19,12 @@ type IDateTimeParser interface {
 	ParseISO8601(dateString string) time.Time
 	ParseShortDate(dateString string) time.Time
 	ParseISO8601SqlUtc(dateString string) time.Time
+	ParseUSDateTime(dateString string) time.Time
 	ValidDateTime(dateString string) bool
 	ValidISO8601(dateString string) bool
 	ValidShortDate(dateString string) bool
 	ValidISO8601SqlUtc(dateString string) bool
+	ValidUSDateTime(dateString string) bool
 }
 
 type DateTimeParser struct{}
@@ -85,6 +87,10 @@ func (service *DateTimeParser) Parse(dateString string) (time.Time, error) {
 		return service.ParseShortDate(dateString), nil
 	}
 
+	if service.ValidUSDateTime(dateString) {
+		return service.ParseUSDateTime(dateString), nil
+	}
+
 	return service.NowUTC(), fmt.Errorf("Unknown date/time format: %s", dateString)
 }
 
@@ -105,6 +111,11 @@ func (service *DateTimeParser) ParseShortDate(dateString string) time.Time {
 
 func (service *DateTimeParser) ParseISO8601SqlUtc(dateString string) time.Time {
 	result, _ := time.Parse("2006-01-02T15:04:05.999Z", dateString)
+	return result
+}
+
+func (service *DateTimeParser) ParseUSDateTime(dateString string) time.Time {
+	result, _ := time.Parse("01/02/2006 3:04 PM", dateString)
 	return result
 }
 
@@ -134,6 +145,14 @@ func (service *DateTimeParser) ValidShortDate(dateString string) bool {
 
 func (service *DateTimeParser) ValidISO8601SqlUtc(dateString string) bool {
 	if _, err := time.Parse("2006-01-02T15:04:05.999Z", dateString); err != nil {
+		return false
+	}
+
+	return true
+}
+
+func (service *DateTimeParser) ValidUSDateTime(dateString string) bool {
+	if _, err := time.Parse("01/02/2006 3:04 PM", dateString); err != nil {
 		return false
 	}
 
