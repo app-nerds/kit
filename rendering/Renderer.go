@@ -19,7 +19,9 @@ IRenderer defines an interface for a renderer
 type IRenderer interface {
 	AddTemplateWithLayout(templateItem *TemplateItem) error
 	AddTemplatesWithLayout(templateItems ...*TemplateItem) error
+	Dump()
 	Render(w io.Writer, name string, data interface{}, ctx echo.Context) error
+	SetDebug(value bool)
 }
 
 /*
@@ -27,6 +29,7 @@ Renderer implements the Echo renderer and IRenderer interfaces
 */
 type Renderer struct {
 	dateTimeParser datetime.IDateTimeParser
+	debug          bool
 	logger         *logrus.Entry
 	templates      map[string]*template.Template
 	xssSanitizer   sanitizer.IXSSServiceProvider
@@ -49,6 +52,7 @@ empty set of templates
 func NewRenderer(logger *logrus.Entry) *Renderer {
 	return &Renderer{
 		dateTimeParser: &datetime.DateTimeParser{},
+		debug:          false,
 		logger:         logger,
 		templates:      make(map[string]*template.Template),
 		xssSanitizer:   sanitizer.NewXSSService(),
@@ -103,18 +107,35 @@ cache
 func (r *Renderer) AddTemplateWithLayout(templateItem *TemplateItem) error {
 	var err error
 
+	if r.debug {
+		fmt.Printf("Adding %s...\n", templateItem.Name)
+	}
+
 	t := template.New(templateItem.Name)
 	t = r.addHelperFunctions(t)
 
 	if t, err = t.Parse(templateItem.LayoutContent); err != nil {
+		if r.debug {
+			fmt.Printf("\tError parsing layout - %s\n", err.Error())
+		}
+
 		return errors.Wrapf(err, "Error parsing layout while attempting to add template %s", templateItem.Name)
 	}
 
 	if t, err = t.Parse(templateItem.PageContent); err != nil {
+		if r.debug {
+			fmt.Printf("\tError parsing template - %s\n", err.Error())
+		}
+
 		return errors.Wrapf(err, "Error parsing page while attempting to add template %s", templateItem.Name)
 	}
 
 	r.templates[templateItem.Name] = t
+
+	if r.debug {
+		fmt.Printf("\tTemplate parsed successfully!\n")
+	}
+
 	return nil
 }
 
@@ -124,13 +145,30 @@ AddTemplatesWithLayout adds one ore more template items
 func (r *Renderer) AddTemplatesWithLayout(templateItems ...*TemplateItem) error {
 	var err error
 
+	if r.debug {
+		fmt.Printf("\n\n-------------------------------------------------------------------------------\n")
+		fmt.Printf("\nAdding %d templates...\n", len(templateItems))
+	}
+
 	for _, templateItem := range templateItems {
 		if err = r.AddTemplateWithLayout(templateItem); err != nil {
 			return err
 		}
 	}
 
+	if r.debug {
+		fmt.Printf("\n-------------------------------------------------------------------------------\n\n")
+	}
+
 	return nil
+}
+
+func (r *Renderer) Dump() {
+	fmt.Printf("\n\n-------------------------------------------------------------------------------\n")
+	for key, t := range r.templates {
+		fmt.Printf("\tTemplate '%s' - %v\n", key, t)
+	}
+	fmt.Printf("\n-------------------------------------------------------------------------------\n\n")
 }
 
 /*
@@ -140,7 +178,10 @@ func (r *Renderer) Render(w io.Writer, name string, data interface{}, ctx echo.C
 	var ok bool
 
 	if _, ok = r.templates[name]; !ok {
-		fmt.Printf("\nTemplate %s not found\n", name)
+		if r.debug {
+			fmt.Printf("\nTemplate %s not found\n", name)
+		}
+
 		return errors.New("Template " + name + " not found")
 	}
 
@@ -155,4 +196,8 @@ func (r *Renderer) Render(w io.Writer, name string, data interface{}, ctx echo.C
 	}
 
 	return nil
+}
+
+func (r *Renderer) SetDebug(value bool) {
+	r.debug = value
 }
