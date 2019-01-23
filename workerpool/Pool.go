@@ -57,7 +57,6 @@ IPool describes an interface for managing a pool of workers
 who perform jobs
 */
 type IPool interface {
-	AssignJob(job Job) JobError
 	PutWorkerInTheQueue(worker IWorker)
 	Shutdown()
 	Start()
@@ -116,10 +115,10 @@ func NewPool(config PoolConfig) *Pool {
 }
 
 /*
-AssignJob attempts to assign a job to a worker, if available. If a
+assignJob attempts to assign a job to a worker, if available. If a
 worker is not available an error is returned
 */
-func (p *Pool) AssignJob(job Job) JobError {
+func (p *Pool) assignJob(job Job) JobError {
 	select {
 	case worker := <-p.workerQueue:
 		if worker != nil {
@@ -166,7 +165,7 @@ func (p *Pool) Start() {
 				break
 
 			case job := <-p.jobQueue:
-				err := p.AssignJob(job)
+				err := p.assignJob(job)
 
 				if err != nil {
 					p.ErrorQueue <- err
