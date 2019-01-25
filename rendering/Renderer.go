@@ -17,9 +17,8 @@ import (
 IRenderer defines an interface for a renderer
 */
 type IRenderer interface {
-	AddTemplateWithLayout(templateItem *TemplateItem) error
-	AddTemplatesWithLayout(templateItems ...*TemplateItem) error
-	Dump()
+	AddTemplates(templateItems ...*Template) error
+	AddTemplatesWithLayout(templateItems ...*TemplateWithLayout) error
 	Render(w io.Writer, name string, data interface{}, ctx echo.Context) error
 	SetDebug(value bool)
 }
@@ -36,10 +35,18 @@ type Renderer struct {
 }
 
 /*
-A TemplateItem describes a template to be rendered. This includes
+A Template is a simple Go template with a name
+*/
+type Template struct {
+	Name        string
+	PageContent string
+}
+
+/*
+A TemplateWithLayout describes a template to be rendered. This includes
 the template's layout, name, and content
 */
-type TemplateItem struct {
+type TemplateWithLayout struct {
 	LayoutContent string
 	Name          string
 	PageContent   string
@@ -101,10 +108,41 @@ func (r *Renderer) addHelperFunctions(t *template.Template) *template.Template {
 }
 
 /*
-AddTemplateWithLayout adds a single template item to the template
+addTemplateWithLayout adds a single template item to the template
 cache
 */
-func (r *Renderer) AddTemplateWithLayout(templateItem *TemplateItem) error {
+func (r *Renderer) addTemplate(templateItem *Template) error {
+	var err error
+
+	if r.debug {
+		fmt.Printf("Adding %s...\n", templateItem.Name)
+	}
+
+	t := template.New(templateItem.Name)
+	t = r.addHelperFunctions(t)
+
+	if t, err = t.Parse(templateItem.PageContent); err != nil {
+		if r.debug {
+			fmt.Printf("\tError parsing template - %s\n", err.Error())
+		}
+
+		return errors.Wrapf(err, "Error parsing page while attempting to add template %s", templateItem.Name)
+	}
+
+	r.templates[templateItem.Name] = t
+
+	if r.debug {
+		fmt.Printf("\tTemplate parsed successfully!\n")
+	}
+
+	return nil
+}
+
+/*
+addTemplateWithLayout adds a single template item with a layout to the template
+cache
+*/
+func (r *Renderer) addTemplateWithLayout(templateItem *TemplateWithLayout) error {
 	var err error
 
 	if r.debug {
@@ -140,9 +178,9 @@ func (r *Renderer) AddTemplateWithLayout(templateItem *TemplateItem) error {
 }
 
 /*
-AddTemplatesWithLayout adds one ore more template items
+AddTemplates adds one or more templates
 */
-func (r *Renderer) AddTemplatesWithLayout(templateItems ...*TemplateItem) error {
+func (r *Renderer) AddTemplates(templateItems ...*Template) error {
 	var err error
 
 	if r.debug {
@@ -151,7 +189,7 @@ func (r *Renderer) AddTemplatesWithLayout(templateItems ...*TemplateItem) error 
 	}
 
 	for _, templateItem := range templateItems {
-		if err = r.AddTemplateWithLayout(templateItem); err != nil {
+		if err = r.addTemplate(templateItem); err != nil {
 			return err
 		}
 	}
@@ -163,12 +201,28 @@ func (r *Renderer) AddTemplatesWithLayout(templateItems ...*TemplateItem) error 
 	return nil
 }
 
-func (r *Renderer) Dump() {
-	fmt.Printf("\n\n-------------------------------------------------------------------------------\n")
-	for key, t := range r.templates {
-		fmt.Printf("\tTemplate '%s' - %v\n", key, t)
+/*
+AddTemplatesWithLayout adds one ore more templates with layouts
+*/
+func (r *Renderer) AddTemplatesWithLayout(templateItems ...*TemplateWithLayout) error {
+	var err error
+
+	if r.debug {
+		fmt.Printf("\n\n-------------------------------------------------------------------------------\n")
+		fmt.Printf("\nAdding %d templates with layouts...\n", len(templateItems))
 	}
-	fmt.Printf("\n-------------------------------------------------------------------------------\n\n")
+
+	for _, templateItem := range templateItems {
+		if err = r.addTemplateWithLayout(templateItem); err != nil {
+			return err
+		}
+	}
+
+	if r.debug {
+		fmt.Printf("\n-------------------------------------------------------------------------------\n\n")
+	}
+
+	return nil
 }
 
 /*
