@@ -3,11 +3,13 @@ package serverstats
 import (
 	"container/ring"
 	"net/http"
+	"runtime"
 	"strconv"
 	"sync"
 	"time"
 
 	"github.com/labstack/echo"
+	"github.com/shirou/gopsutil/mem"
 )
 
 /*
@@ -17,13 +19,14 @@ down by HTTP status code. ServerStats is thread-safe due to a
 write lock on requests, and a read lock on reads
 */
 type ServerStats struct {
-	CustomStats   map[string]interface{} `json:"customStats"`
-	Uptime        time.Time              `json:"uptime"`
-	RequestCount  uint64                 `json:"requestCount"`
-	ResponseTimes *ring.Ring
-	Statuses      map[string]int `json:"statuses"`
-
-	customMiddleware func(ctx echo.Context, serverStats *ServerStats)
+	AverageFreeSystemMemory *ring.Ring
+	AverageMemoryUsage      *ring.Ring
+	CustomStats             map[string]interface{} `json:"customStats"`
+	Uptime                  time.Time              `json:"uptime"`
+	RequestCount            uint64                 `json:"requestCount"`
+	ResponseTimes           *ring.Ring
+	Statuses                map[string]int `json:"statuses"`
+	customMiddleware        func(ctx echo.Context, serverStats *ServerStats)
 
 	mutex sync.RWMutex
 }
@@ -33,11 +36,13 @@ NewServerStats creates a new ServerStats object
 */
 func NewServerStats(customMiddleware func(ctx echo.Context, serverStats *ServerStats)) *ServerStats {
 	return &ServerStats{
-		customMiddleware: customMiddleware,
-		CustomStats:      make(map[string]interface{}),
-		Uptime:           time.Now().UTC(),
-		ResponseTimes:    ring.New(1000),
-		Statuses:         make(map[string]int),
+		AverageFreeSystemMemory: ring.New(100),
+		AverageMemoryUsage:      ring.New(100),
+		customMiddleware:        customMiddleware,
+		CustomStats:             make(map[string]interface{}),
+		Uptime:                  time.Now().UTC(),
+		ResponseTimes:           ring.New(1000),
+		Statuses:                make(map[string]int),
 	}
 }
 
@@ -48,6 +53,8 @@ to be used with the Echo framework
 func (s *ServerStats) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		var err error
+		var memStats *runtime.MemStats
+		var vMemStats *mem.VirtualMemoryStat
 
 		startTime := time.Now()
 
@@ -64,6 +71,15 @@ func (s *ServerStats) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		s.ResponseTimes = s.ResponseTimes.Next()
 		s.ResponseTimes.Value = endTime
+
+		s.AverageFreeSystemMemory = s.AverageFreeSystemMemory.Next()
+		s.AverageMemoryUsage = s.AverageMemoryUsage.Next()
+
+		vMemStats, _ = mem.VirtualMemory()
+		runtime.ReadMemStats(memStats)
+
+		s.AverageFreeSystemMemory.Value = vMemStats.Free
+		s.AverageMemoryUsage.Value = memStats.Sys
 
 		status := strconv.Itoa(ctx.Response().Status)
 		s.Statuses[status]++
