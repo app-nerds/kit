@@ -8,6 +8,7 @@ import (
 	"sync"
 	"time"
 
+	"github.com/dustin/go-humanize"
 	"github.com/labstack/echo"
 	"github.com/shirou/gopsutil/mem"
 )
@@ -53,8 +54,6 @@ to be used with the Echo framework
 func (s *ServerStats) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 	return func(ctx echo.Context) error {
 		var err error
-		var memStats *runtime.MemStats
-		var vMemStats *mem.VirtualMemoryStat
 
 		startTime := time.Now()
 
@@ -75,10 +74,13 @@ func (s *ServerStats) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 		s.AverageFreeSystemMemory = s.AverageFreeSystemMemory.Next()
 		s.AverageMemoryUsage = s.AverageMemoryUsage.Next()
 
-		vMemStats, _ = mem.VirtualMemory()
+		memStats := &runtime.MemStats{}
 		runtime.ReadMemStats(memStats)
 
-		s.AverageFreeSystemMemory.Value = vMemStats.Free
+		var vMemStats *mem.VirtualMemoryStat
+		vMemStats, _ = mem.VirtualMemory()
+
+		s.AverageFreeSystemMemory.Value = vMemStats.Available
 		s.AverageMemoryUsage.Value = memStats.Sys
 
 		status := strconv.Itoa(ctx.Response().Status)
@@ -102,6 +104,9 @@ func (s *ServerStats) Handler(ctx echo.Context) error {
 
 	var averageResponseTime int64
 	var numResponses int64
+	var averageFreeMemory uint64
+	var averageMemoryUsage uint64
+
 	averageResponseTime = 0
 	numResponses = 0
 
@@ -116,7 +121,39 @@ func (s *ServerStats) Handler(ctx echo.Context) error {
 		averageResponseTime = averageResponseTime / numResponses
 	}
 
+	averageFreeMemory = 0
+	numResponses = 0
+
+	s.AverageFreeSystemMemory.Do(func(iFreeMemory interface{}) {
+		if freeMemory, ok := iFreeMemory.(uint64); ok {
+			averageFreeMemory += freeMemory
+			numResponses++
+		}
+	})
+
+	if numResponses > 0 {
+		averageFreeMemory = averageFreeMemory / uint64(numResponses)
+	}
+
+	averageMemoryUsage = 0
+	numResponses = 0
+
+	s.AverageMemoryUsage.Do(func(iMemUse interface{}) {
+		if memUse, ok := iMemUse.(uint64); ok {
+			averageMemoryUsage += memUse
+			numResponses++
+		}
+	})
+
+	if numResponses > 0 {
+		averageMemoryUsage = averageMemoryUsage / uint64(numResponses)
+	}
+
 	result := struct {
+		AverageFreeMemory                 uint64                 `json:"averageFreeMemory"`
+		AverageFreeMemoryPretty           string                 `json:"averageFreeMemoryPretty"`
+		AverageMemoryUsage                uint64                 `json:"averageMemoryUsage"`
+		AverageMemoryUsagePretty          string                 `json:"averageMemoryUsagePretty"`
 		AverageResponseTimeInNanoseconds  int64                  `json:"averageResponseTimeInNanoseconds"`
 		AverageResponseTimeInMicroseconds int64                  `json:"averageResponseTimeInMicroseconds"`
 		AverageResponseTimeInMilliseconds int64                  `json:"averageResponseTimeInMilliseconds"`
@@ -125,6 +162,10 @@ func (s *ServerStats) Handler(ctx echo.Context) error {
 		RequestCount                      uint64                 `json:"requestCount"`
 		Statuses                          map[string]int         `json:"statuses"`
 	}{
+		AverageFreeMemory:                 averageFreeMemory,
+		AverageFreeMemoryPretty:           humanize.Bytes(averageFreeMemory),
+		AverageMemoryUsage:                averageMemoryUsage,
+		AverageMemoryUsagePretty:          humanize.Bytes(averageMemoryUsage),
 		AverageResponseTimeInNanoseconds:  averageResponseTime,
 		AverageResponseTimeInMicroseconds: averageResponseTime / 1000,
 		AverageResponseTimeInMilliseconds: averageResponseTime / 1000 / 1000,
