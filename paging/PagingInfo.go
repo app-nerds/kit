@@ -35,7 +35,10 @@ func (p *PagingInfo) Calculate(currentPage, pageSize, totalItems int) {
 		p.PageSize = totalItems
 	}
 
-	p.TotalPages = int(math.Ceil(float64(totalItems / p.PageSize)))
+	if p.PageSize > 0 {
+		p.TotalPages = int(math.Ceil(float64(totalItems / p.PageSize)))
+	}
+
 	p.NextPage = currentPage + 1
 	p.PreviousPage = currentPage - 1
 	p.HasNextPage = true
