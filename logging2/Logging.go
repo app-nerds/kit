@@ -18,7 +18,6 @@ func NewFireplaceLogger(application, logLevel, fireplaceURL string, fields logru
 	}
 
 	logger := logrus.New().WithFields(fields)
-	logger.Logger.Formatter = &logrus.JSONFormatter{}
 	logger.Logger.SetLevel(level)
 
 	logger.Logger.AddHook(fireplacehook.NewFireplaceHook(&fireplacehook.FireplaceHookConfig{
