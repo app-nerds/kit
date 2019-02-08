@@ -3,9 +3,12 @@ package datetime
 import (
 	"fmt"
 	"time"
+
+	"github.com/pkg/errors"
 )
 
 type IDateTimeParser interface {
+	DaysAgo(numDays int) (time.Time, error)
 	GetUTCLocation() *time.Location
 	NowUTC() time.Time
 	IsDateOlderThanNumDaysAgo(t time.Time, numDays int) bool
@@ -20,6 +23,7 @@ type IDateTimeParser interface {
 	ParseShortDate(dateString string) time.Time
 	ParseISO8601SqlUtc(dateString string) time.Time
 	ParseUSDateTime(dateString string) time.Time
+	Pretty(t time.Time) string
 	ValidDateTime(dateString string) bool
 	ValidISO8601(dateString string) bool
 	ValidShortDate(dateString string) bool
@@ -28,6 +32,22 @@ type IDateTimeParser interface {
 }
 
 type DateTimeParser struct{}
+
+/*
+DaysAgo returns the current date minus the number of specified days
+*/
+func (service *DateTimeParser) DaysAgo(numDays int) (time.Time, error) {
+	var hoursAgo time.Duration
+	var err error
+
+	hoursAgoString := fmt.Sprintf("%dh", 24*numDays)
+	if hoursAgo, err = time.ParseDuration(hoursAgoString); err != nil {
+		return time.Now().UTC(), errors.Wrapf(err, "Unable to convert days to hours string")
+	}
+
+	result := time.Now().UTC().Add(hoursAgo)
+	return result, nil
+}
 
 /*
 GetUTCLocation returns location information for the UTC timezone
@@ -116,6 +136,13 @@ func (service *DateTimeParser) ParseISO8601SqlUtc(dateString string) time.Time {
 
 func (service *DateTimeParser) ParseUSDateTime(dateString string) time.Time {
 	result, _ := time.Parse("01/02/2006 3:04 PM", dateString)
+	return result
+}
+
+func (service *DateTimeParser) Pretty(t time.Time) string {
+	var result string
+
+	result = t.Format("Jan _2 2006 at 3:04PM")
 	return result
 }
 

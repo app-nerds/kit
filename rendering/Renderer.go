@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"html/template"
 	"io"
+	"io/ioutil"
 	"reflect"
 
 	"code.appninjas.biz/appninjas/kit/datetime"
@@ -19,6 +20,7 @@ IRenderer defines an interface for a renderer
 type IRenderer interface {
 	AddTemplates(templateItems ...*Template) error
 	AddTemplatesWithLayout(templateItems ...*TemplateWithLayout) error
+	LoadFile(fileName string) string
 	Render(w io.Writer, name string, data interface{}, ctx echo.Context) error
 	SetDebug(value bool)
 }
@@ -223,6 +225,24 @@ func (r *Renderer) AddTemplatesWithLayout(templateItems ...*TemplateWithLayout) 
 	}
 
 	return nil
+}
+
+/*
+LoadFile reads all the contents of a file
+*/
+func (r *Renderer) LoadFile(fileName string) string {
+	var err error
+	var result []byte
+
+	if result, err = ioutil.ReadFile(fileName); err != nil {
+		if r.debug {
+			fmt.Printf("Error reading file %s in LoadFile", fileName)
+		}
+
+		return ""
+	}
+
+	return string(result)
 }
 
 /*
