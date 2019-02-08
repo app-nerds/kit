@@ -103,6 +103,9 @@ func (r *Renderer) addHelperFunctions(t *template.Template) *template.Template {
 		"intGTE": func(value1, value2 int) bool {
 			return value1 >= value2
 		},
+		"neq": func(a, b interface{}) bool {
+			return a != b
+		},
 	}
 
 	t = t.Funcs(funcMap)
@@ -163,11 +166,7 @@ func (r *Renderer) addTemplateWithLayout(templateItem *TemplateWithLayout) error
 	}
 
 	if t, err = t.Parse(templateItem.PageContent); err != nil {
-		if r.debug {
-			fmt.Printf("\tError parsing template - %s\n", err.Error())
-		}
-
-		return errors.Wrapf(err, "Error parsing page while attempting to add template %s", templateItem.Name)
+		panic("Error parsing template '" + templateItem.Name + "' - " + err.Error())
 	}
 
 	r.templates[templateItem.Name] = t
