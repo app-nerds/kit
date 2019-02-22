@@ -4,7 +4,7 @@ import (
 	"testing"
 	"time"
 
-	"code.appninjas.biz/appninjas/kit/datetime"
+	"github.com/app-nerds/kit/datetime"
 )
 
 func TestDaysAgo(t *testing.T) {

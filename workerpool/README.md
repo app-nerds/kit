@@ -14,7 +14,7 @@ import (
 	"fmt"
 	"time"
 
-	"code.appninjas.biz/appninjas/kit/workerpool"
+	"github.com/app-nerds/kit/workerpool"
 )
 
 type Job struct {
