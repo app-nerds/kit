@@ -1,7 +1,7 @@
 package logging2
 
 import (
-	fireplacehook "github.com/adampresley/fireplace/cmd/fireplace-hook"
+	fireplacehook "github.com/app-nerds/fireplace/cmd/fireplace-hook"
 	"github.com/sirupsen/logrus"
 )
 

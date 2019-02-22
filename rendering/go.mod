@@ -1,7 +1,8 @@
 module github.com/app-nerds/kit/rendering
 
 require (
-	github.com/app-nerds/kit v0.0.0-20190222033356-34779b1d48a6 // indirect
+	github.com/app-nerds/kit/datetime v0.0.0-20190222034645-0b88e6e25e42
+	github.com/app-nerds/kit/sanitizer v0.0.0-20190222034645-0b88e6e25e42
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.2.8 // indirect
 	github.com/mattn/go-colorable v0.1.0 // indirect
