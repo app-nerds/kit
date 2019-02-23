@@ -9,7 +9,7 @@ import (
 
 	"github.com/app-nerds/kit/datetime"
 	"github.com/app-nerds/kit/sanitizer"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"
 )
