@@ -1,6 +1,7 @@
 module github.com/app-nerds/kit/serverstats
 
 require (
+	github.com/app-nerds/kit/datetime v0.0.0-20190328010523-765c9ecbbdf1
 	github.com/dustin/go-humanize v1.0.0
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/gommon v0.2.8 // indirect

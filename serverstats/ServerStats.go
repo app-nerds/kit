@@ -2,6 +2,7 @@ package serverstats
 
 import (
 	"container/ring"
+	"fmt"
 	"net/http"
 	"runtime"
 	"strconv"
@@ -29,7 +30,7 @@ type ServerStats struct {
 	Statuses                map[string]int `json:"statuses"`
 	customMiddleware        func(ctx echo.Context, serverStats *ServerStats)
 
-	mutex sync.RWMutex
+	sync.RWMutex
 }
 
 /*
@@ -44,7 +45,186 @@ func NewServerStats(customMiddleware func(ctx echo.Context, serverStats *ServerS
 		Uptime:                  time.Now().UTC(),
 		ResponseTimes:           ring.New(1000),
 		Statuses:                make(map[string]int),
+
+		RWMutex: sync.RWMutex{},
 	}
+}
+
+/*
+GetAverageResponseTimeGraph returns an array of response time objects. The precision
+specifies at what interval you wish to get data for. For example, passing
+Hour gets you response times averaged by hour. Passing Day gets you response
+times averaged by day
+*/
+func (s *ServerStats) GetAverageResponseTimeGraph(precision ResponseTimePrecision) ResponseTimeGraphCollection {
+	switch precision {
+	case PRECISION_HOUR:
+		return s.breakResponsesIntoHours()
+
+	case PRECISION_MONTH:
+		return s.breakResponsesIntoMonths()
+
+	default:
+		return s.breakResponsesIntoDays()
+	}
+}
+
+func (s *ServerStats) breakResponsesIntoHours() ResponseTimeGraphCollection {
+	result := make(ResponseTimeGraphCollection, 0, 20)
+	timeIndex := make(map[string]int64)
+	currentTimeToIndex := ""
+	count := 0
+
+	s.RLock()
+	defer s.RUnlock()
+
+	s.ResponseTimes.Do(func(r interface{}) {
+		var ok bool
+		var responseTime ResponseTime
+
+		if responseTime, ok = r.(ResponseTime); ok {
+			timeToIndex := responseTime.Time.Format("2006-01-02T15:00:00")
+
+			if _, ok = timeIndex[timeToIndex]; !ok {
+				if currentTimeToIndex != "" {
+					parsedTime, _ := time.Parse(currentTimeToIndex, "2006-01-02T15:04:05")
+
+					newResponseTimeGraph := &ResponseTimeGraph{
+						AverageExecutionTimeMilliseconds: (timeIndex[currentTimeToIndex] / int64(count)) / 1000 / 1000,
+						Time:                             parsedTime,
+					}
+
+					result = append(result, newResponseTimeGraph)
+					fmt.Printf("Adding new graph item: %+v\n\n", newResponseTimeGraph)
+				}
+
+				fmt.Printf("Creating time index %s\n", timeToIndex)
+				timeIndex[timeToIndex] = 0
+				currentTimeToIndex = timeToIndex
+				count = 0
+			}
+
+			timeIndex[timeToIndex] += int64(responseTime.ExecutionTime)
+			count++
+		}
+	})
+
+	if currentTimeToIndex != "" {
+		parsedTime, _ := time.Parse(currentTimeToIndex, "2006-01-02T15:04:05")
+		newResponseTimeGraph := &ResponseTimeGraph{
+			AverageExecutionTimeMilliseconds: (timeIndex[currentTimeToIndex] / int64(count)) / 1000 / 1000,
+			Time:                             parsedTime,
+		}
+
+		result = append(result, newResponseTimeGraph)
+		fmt.Printf("Adding new graph item: %+v\n\n", newResponseTimeGraph)
+	}
+
+	return result
+}
+
+func (s *ServerStats) breakResponsesIntoDays() ResponseTimeGraphCollection {
+	result := make(ResponseTimeGraphCollection, 0, 20)
+	timeIndex := make(map[string]int64)
+	currentTimeToIndex := ""
+	count := 0
+
+	s.RLock()
+	defer s.RUnlock()
+
+	s.ResponseTimes.Do(func(r interface{}) {
+		var ok bool
+		var responseTime ResponseTime
+
+		if responseTime, ok = r.(ResponseTime); ok {
+			timeToIndex := responseTime.Time.Format("2006-01-02T00:00:00")
+
+			if _, ok = timeIndex[timeToIndex]; !ok {
+				if currentTimeToIndex != "" {
+					parsedTime, _ := time.Parse(currentTimeToIndex, "2006-01-02T15:04:05")
+
+					newResponseTimeGraph := &ResponseTimeGraph{
+						AverageExecutionTimeMilliseconds: (timeIndex[currentTimeToIndex] / int64(count)) / 1000 / 1000,
+						Time:                             parsedTime,
+					}
+
+					result = append(result, newResponseTimeGraph)
+				}
+
+				timeIndex[timeToIndex] = 0
+				currentTimeToIndex = timeToIndex
+				count = 0
+			}
+
+			timeIndex[timeToIndex] += int64(responseTime.ExecutionTime)
+			count++
+		}
+	})
+
+	if currentTimeToIndex != "" {
+		parsedTime, _ := time.Parse(currentTimeToIndex, "2006-01-02T15:04:05")
+		newResponseTimeGraph := &ResponseTimeGraph{
+			AverageExecutionTimeMilliseconds: (timeIndex[currentTimeToIndex] / int64(count)) / 1000 / 1000,
+			Time:                             parsedTime,
+		}
+
+		result = append(result, newResponseTimeGraph)
+		fmt.Printf("Adding new graph item: %+v\n\n", newResponseTimeGraph)
+	}
+
+	return result
+}
+
+func (s *ServerStats) breakResponsesIntoMonths() ResponseTimeGraphCollection {
+	result := make(ResponseTimeGraphCollection, 0, 20)
+	timeIndex := make(map[string]int64)
+	currentTimeToIndex := ""
+	count := 0
+
+	s.RLock()
+	defer s.RUnlock()
+
+	s.ResponseTimes.Do(func(r interface{}) {
+		var ok bool
+		var responseTime ResponseTime
+
+		if responseTime, ok = r.(ResponseTime); ok {
+			timeToIndex := responseTime.Time.Format("2006-01-01T00:00:00")
+
+			if _, ok = timeIndex[timeToIndex]; !ok {
+				if currentTimeToIndex != "" {
+					parsedTime, _ := time.Parse(currentTimeToIndex, "2006-01-02T15:04:05")
+
+					newResponseTimeGraph := &ResponseTimeGraph{
+						AverageExecutionTimeMilliseconds: (timeIndex[currentTimeToIndex] / int64(count)) / 1000 / 1000,
+						Time:                             parsedTime,
+					}
+
+					result = append(result, newResponseTimeGraph)
+				}
+
+				timeIndex[timeToIndex] = 0
+				currentTimeToIndex = timeToIndex
+				count = 0
+			}
+
+			timeIndex[timeToIndex] += int64(responseTime.ExecutionTime)
+			count++
+		}
+	})
+
+	if currentTimeToIndex != "" {
+		parsedTime, _ := time.Parse(currentTimeToIndex, "2006-01-02T15:04:05")
+		newResponseTimeGraph := &ResponseTimeGraph{
+			AverageExecutionTimeMilliseconds: (timeIndex[currentTimeToIndex] / int64(count)) / 1000 / 1000,
+			Time:                             parsedTime,
+		}
+
+		result = append(result, newResponseTimeGraph)
+		fmt.Printf("Adding new graph item: %+v\n\n", newResponseTimeGraph)
+	}
+
+	return result
 }
 
 /*
@@ -63,13 +243,16 @@ func (s *ServerStats) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 
 		endTime := time.Since(startTime)
 
-		s.mutex.Lock()
-		defer s.mutex.Unlock()
+		s.Lock()
+		defer s.Unlock()
 
 		s.RequestCount++
 
 		s.ResponseTimes = s.ResponseTimes.Next()
-		s.ResponseTimes.Value = endTime
+		s.ResponseTimes.Value = ResponseTime{
+			ExecutionTime: endTime,
+			Time:          startTime.UTC(),
+		}
 
 		s.AverageFreeSystemMemory = s.AverageFreeSystemMemory.Next()
 		s.AverageMemoryUsage = s.AverageMemoryUsage.Next()
@@ -99,8 +282,8 @@ Handler is an endpoint handler you can plug into your application
 to return stat data
 */
 func (s *ServerStats) Handler(ctx echo.Context) error {
-	s.mutex.RLock()
-	defer s.mutex.RUnlock()
+	s.RLock()
+	defer s.RUnlock()
 
 	var averageResponseTime int64
 	var numResponses int64
@@ -111,8 +294,8 @@ func (s *ServerStats) Handler(ctx echo.Context) error {
 	numResponses = 0
 
 	s.ResponseTimes.Do(func(responseTime interface{}) {
-		if responseTimeDuration, ok := responseTime.(time.Duration); ok {
-			averageResponseTime += int64(responseTimeDuration)
+		if responseTimeDuration, ok := responseTime.(ResponseTime); ok {
+			averageResponseTime += int64(responseTimeDuration.ExecutionTime)
 			numResponses++
 		}
 	})
