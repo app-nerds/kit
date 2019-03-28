@@ -46,7 +46,7 @@ func (service *DateTimeParser) DaysAgo(numDays int) (time.Time, error) {
 	var hoursAgo time.Duration
 	var err error
 
-	hoursAgoString := fmt.Sprintf("%dh", 24*numDays)
+	hoursAgoString := fmt.Sprintf("%dh", -24*numDays)
 	if hoursAgo, err = time.ParseDuration(hoursAgoString); err != nil {
 		return time.Now().UTC(), errors.Wrapf(err, "Unable to convert days to hours string")
 	}

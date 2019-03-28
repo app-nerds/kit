@@ -12,7 +12,7 @@ func TestDaysAgo(t *testing.T) {
 	var actual time.Time
 	service := getService()
 
-	expected := time.Now().UTC().Add(24 * time.Hour)
+	expected := time.Now().UTC().Add(-24 * time.Hour)
 
 	if actual, err = service.DaysAgo(1); err != nil {
 		t.Errorf(err.Error())
