@@ -1,9 +1,15 @@
 package serverstats
 
+// ResponseTimePrecision describes how granular to report response times
 type ResponseTimePrecision int
 
 const (
-	PRECISION_HOUR  ResponseTimePrecision = 1
-	PRECISION_DAY   ResponseTimePrecision = 2
-	PRECISION_MONTH ResponseTimePrecision = 3
+	// PrecisionHour reports responses times averaged by hour
+	PrecisionHour ResponseTimePrecision = 1
+
+	// PrecisionDay reports respose times averaged by day
+	PrecisionDay ResponseTimePrecision = 2
+
+	// PrecisionMonth reports response times averaged by month
+	PrecisionMonth ResponseTimePrecision = 3
 )

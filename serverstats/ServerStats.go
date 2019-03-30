@@ -58,10 +58,10 @@ times averaged by day
 */
 func (s *ServerStats) GetAverageResponseTimeGraph(precision ResponseTimePrecision) ResponseTimeGraphCollection {
 	switch precision {
-	case PRECISION_HOUR:
+	case PrecisionHour:
 		return s.breakResponsesIntoHours()
 
-	case PRECISION_MONTH:
+	case PrecisionMonth:
 		return s.breakResponsesIntoMonths()
 
 	default:
@@ -87,18 +87,16 @@ func (s *ServerStats) breakResponsesIntoHours() ResponseTimeGraphCollection {
 
 			if _, ok = timeIndex[timeToIndex]; !ok {
 				if currentTimeToIndex != "" {
-					parsedTime, _ := time.Parse(currentTimeToIndex, "2006-01-02T15:04:05")
-
 					newResponseTimeGraph := &ResponseTimeGraph{
-						AverageExecutionTimeMilliseconds: (timeIndex[currentTimeToIndex] / int64(count)) / 1000 / 1000,
-						Time:                             parsedTime,
+						AverageResponseTimeInNanoseconds:  timeIndex[currentTimeToIndex] / int64(count),
+						AverageResponseTimeInMicroseconds: (timeIndex[currentTimeToIndex] / int64(count)) / 1000,
+						AverageExecutionTimeMilliseconds:  (timeIndex[currentTimeToIndex] / int64(count)) / 1000 / 1000,
+						Time:                              currentTimeToIndex,
 					}
 
 					result = append(result, newResponseTimeGraph)
-					fmt.Printf("Adding new graph item: %+v\n\n", newResponseTimeGraph)
 				}
 
-				fmt.Printf("Creating time index %s\n", timeToIndex)
 				timeIndex[timeToIndex] = 0
 				currentTimeToIndex = timeToIndex
 				count = 0
@@ -110,14 +108,14 @@ func (s *ServerStats) breakResponsesIntoHours() ResponseTimeGraphCollection {
 	})
 
 	if currentTimeToIndex != "" {
-		parsedTime, _ := time.Parse(currentTimeToIndex, "2006-01-02T15:04:05")
 		newResponseTimeGraph := &ResponseTimeGraph{
-			AverageExecutionTimeMilliseconds: (timeIndex[currentTimeToIndex] / int64(count)) / 1000 / 1000,
-			Time:                             parsedTime,
+			AverageResponseTimeInNanoseconds:  timeIndex[currentTimeToIndex] / int64(count),
+			AverageResponseTimeInMicroseconds: (timeIndex[currentTimeToIndex] / int64(count)) / 1000,
+			AverageExecutionTimeMilliseconds:  (timeIndex[currentTimeToIndex] / int64(count)) / 1000 / 1000,
+			Time:                              currentTimeToIndex,
 		}
 
 		result = append(result, newResponseTimeGraph)
-		fmt.Printf("Adding new graph item: %+v\n\n", newResponseTimeGraph)
 	}
 
 	return result
@@ -141,11 +139,11 @@ func (s *ServerStats) breakResponsesIntoDays() ResponseTimeGraphCollection {
 
 			if _, ok = timeIndex[timeToIndex]; !ok {
 				if currentTimeToIndex != "" {
-					parsedTime, _ := time.Parse(currentTimeToIndex, "2006-01-02T15:04:05")
-
 					newResponseTimeGraph := &ResponseTimeGraph{
-						AverageExecutionTimeMilliseconds: (timeIndex[currentTimeToIndex] / int64(count)) / 1000 / 1000,
-						Time:                             parsedTime,
+						AverageResponseTimeInNanoseconds:  timeIndex[currentTimeToIndex] / int64(count),
+						AverageResponseTimeInMicroseconds: (timeIndex[currentTimeToIndex] / int64(count)) / 1000,
+						AverageExecutionTimeMilliseconds:  (timeIndex[currentTimeToIndex] / int64(count)) / 1000 / 1000,
+						Time:                              currentTimeToIndex,
 					}
 
 					result = append(result, newResponseTimeGraph)
@@ -162,14 +160,14 @@ func (s *ServerStats) breakResponsesIntoDays() ResponseTimeGraphCollection {
 	})
 
 	if currentTimeToIndex != "" {
-		parsedTime, _ := time.Parse(currentTimeToIndex, "2006-01-02T15:04:05")
 		newResponseTimeGraph := &ResponseTimeGraph{
-			AverageExecutionTimeMilliseconds: (timeIndex[currentTimeToIndex] / int64(count)) / 1000 / 1000,
-			Time:                             parsedTime,
+			AverageResponseTimeInNanoseconds:  timeIndex[currentTimeToIndex] / int64(count),
+			AverageResponseTimeInMicroseconds: (timeIndex[currentTimeToIndex] / int64(count)) / 1000,
+			AverageExecutionTimeMilliseconds:  (timeIndex[currentTimeToIndex] / int64(count)) / 1000 / 1000,
+			Time:                              currentTimeToIndex,
 		}
 
 		result = append(result, newResponseTimeGraph)
-		fmt.Printf("Adding new graph item: %+v\n\n", newResponseTimeGraph)
 	}
 
 	return result
@@ -189,15 +187,15 @@ func (s *ServerStats) breakResponsesIntoMonths() ResponseTimeGraphCollection {
 		var responseTime ResponseTime
 
 		if responseTime, ok = r.(ResponseTime); ok {
-			timeToIndex := responseTime.Time.Format("2006-01-01T00:00:00")
+			timeToIndex := fmt.Sprintf("%d-%02d-01T00:00:00", responseTime.Time.Year(), responseTime.Time.Month())
 
 			if _, ok = timeIndex[timeToIndex]; !ok {
 				if currentTimeToIndex != "" {
-					parsedTime, _ := time.Parse(currentTimeToIndex, "2006-01-02T15:04:05")
-
 					newResponseTimeGraph := &ResponseTimeGraph{
-						AverageExecutionTimeMilliseconds: (timeIndex[currentTimeToIndex] / int64(count)) / 1000 / 1000,
-						Time:                             parsedTime,
+						AverageResponseTimeInNanoseconds:  timeIndex[currentTimeToIndex] / int64(count),
+						AverageResponseTimeInMicroseconds: (timeIndex[currentTimeToIndex] / int64(count)) / 1000,
+						AverageExecutionTimeMilliseconds:  (timeIndex[currentTimeToIndex] / int64(count)) / 1000 / 1000,
+						Time:                              currentTimeToIndex,
 					}
 
 					result = append(result, newResponseTimeGraph)
@@ -214,14 +212,14 @@ func (s *ServerStats) breakResponsesIntoMonths() ResponseTimeGraphCollection {
 	})
 
 	if currentTimeToIndex != "" {
-		parsedTime, _ := time.Parse(currentTimeToIndex, "2006-01-02T15:04:05")
 		newResponseTimeGraph := &ResponseTimeGraph{
-			AverageExecutionTimeMilliseconds: (timeIndex[currentTimeToIndex] / int64(count)) / 1000 / 1000,
-			Time:                             parsedTime,
+			AverageResponseTimeInNanoseconds:  timeIndex[currentTimeToIndex] / int64(count),
+			AverageResponseTimeInMicroseconds: (timeIndex[currentTimeToIndex] / int64(count)) / 1000,
+			AverageExecutionTimeMilliseconds:  (timeIndex[currentTimeToIndex] / int64(count)) / 1000 / 1000,
+			Time:                              currentTimeToIndex,
 		}
 
 		result = append(result, newResponseTimeGraph)
-		fmt.Printf("Adding new graph item: %+v\n\n", newResponseTimeGraph)
 	}
 
 	return result

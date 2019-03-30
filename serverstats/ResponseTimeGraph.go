@@ -1,10 +1,14 @@
 package serverstats
 
-import "time"
-
+/*
+ResponseTimeGraph reports average response times for a given date/time
+*/
 type ResponseTimeGraph struct {
-	AverageExecutionTimeMilliseconds int64     `json:"averageExecutionTimeMilliseconds"`
-	Time                             time.Time `json:"time"`
+	AverageResponseTimeInNanoseconds  int64  `json:"averageResponseTimeInNanoseconds"`
+	AverageResponseTimeInMicroseconds int64  `json:"averageResponseTimeInMicroseconds"`
+	AverageExecutionTimeMilliseconds  int64  `json:"averageExecutionTimeMilliseconds"`
+	Time                              string `json:"time"`
 }
 
+// ResponseTimeGraphCollection is a collection of ResponseTimeGraph structs
 type ResponseTimeGraphCollection []*ResponseTimeGraph
