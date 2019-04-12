@@ -10,7 +10,7 @@ import (
 	"time"
 
 	"github.com/dustin/go-humanize"
-	"github.com/labstack/echo"
+	"github.com/labstack/echo/v4"
 	"github.com/shirou/gopsutil/mem"
 )
 
