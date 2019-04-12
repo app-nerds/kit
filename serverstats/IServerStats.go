@@ -1,6 +1,6 @@
 package serverstats
 
-import "github.com/labstack/echo"
+import "github.com/labstack/echo/v4"
 
 /*
 IServerStats defines an interface for capturing and retrieving
