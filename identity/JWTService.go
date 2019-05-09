@@ -20,11 +20,9 @@ import (
 )
 
 type IJWTService interface {
-	CreateToken(authSecret, userID, userName string) (string, error)
-	DecryptToken(token string) (string, error)
-	EncryptToken(token string) (string, error)
+	CreateToken(createRequest *CreateTokenRequest) (string, error)
 	GetUserFromToken(token *jwt.Token) (string, string)
-	Parse(tokenFromHeader, authSecret string) (*jwt.Token, error)
+	ParseToken(tokenFromHeader string) (*jwt.Token, error)
 	IsTokenValid(token *jwt.Token) error
 }
 
@@ -33,32 +31,44 @@ JWTService provides methods for working with
 JWTs in MailSlurper
 */
 type JWTService struct {
-	AuthSalt         string
-	AuthSecret       string
-	Issuer           string
-	TimeoutInMinutes int
+	authSalt         string
+	authSecret       string
+	issuer           string
+	timeoutInMinutes int
 }
 
 /*
-CreateToken creates a new JWT token for use in
-MailSlurper services
+CreateToken creates a new JWT token and encrypts it
 */
-func (s *JWTService) CreateToken(authSecret, userID, userName string, additionalData map[string]interface{}) (string, error) {
+func (s *JWTService) CreateToken(createRequest *CreateTokenRequest) (string, error) {
+	var err error
+	var signedToken string
+	var encryptedBase64Token string
+
 	claims := &Claims{
 		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: time.Now().Add(time.Minute * time.Duration(s.TimeoutInMinutes)).Unix(),
-			Issuer:    s.Issuer,
+			ExpiresAt: time.Now().Add(time.Minute * time.Duration(s.timeoutInMinutes)).Unix(),
+			Issuer:    s.issuer,
 		},
-		UserID:   userID,
-		UserName: userName,
+		UserID:   createRequest.UserID,
+		UserName: createRequest.UserName,
 	}
 
-	if additionalData != nil {
-		claims.AdditionalData = additionalData
+	if createRequest.AdditionalData != nil {
+		claims.AdditionalData = createRequest.AdditionalData
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
-	return token.SignedString([]byte(authSecret))
+
+	if signedToken, err = token.SignedString([]byte(s.authSecret)); err != nil {
+		return "", errors.Wrapf(err, "Error signing JWT token")
+	}
+
+	if encryptedBase64Token, err = s.encryptToken(signedToken); err != nil {
+		return "", errors.Wrapf(err, "Error encrypting and encoding token")
+	}
+
+	return encryptedBase64Token, nil
 }
 
 /*
@@ -66,7 +76,7 @@ DecryptToken takes a Base64 encoded token which has been encrypted
 using AES-256 encryption. This returns the unencoded, unencrypted
 token
 */
-func (s *JWTService) DecryptToken(token string) (string, error) {
+func (s *JWTService) decryptToken(token string) (string, error) {
 	var err error
 	var aesBlock cipher.Block
 	var unencodedToken []byte
@@ -106,7 +116,7 @@ func (s *JWTService) DecryptToken(token string) (string, error) {
 EncryptToken takes a token string, encrypts it using AES-256,
 then encodes it in Base64.
 */
-func (s *JWTService) EncryptToken(token string) (string, error) {
+func (s *JWTService) encryptToken(token string) (string, error) {
 	var err error
 	var aesBlock cipher.Block
 	var gcm cipher.AEAD
@@ -144,9 +154,21 @@ func (s *JWTService) GetUserFromToken(token *jwt.Token) (string, string) {
 }
 
 /*
-Parse decrypts the provided token and returns a JWT token object
+NewJWTService creates a new instance of the JWTService struct
 */
-func (s *JWTService) Parse(tokenFromHeader, authSecret string) (*jwt.Token, error) {
+func NewJWTService(config *JWTServiceConfig) *JWTService {
+	return &JWTService{
+		authSalt: config.AuthSalt,
+		authSecret: config.AuthSecret,
+		issuer: config.Issuer,
+		timeoutInMinutes: config.TimeoutInMinutes,
+	}
+}
+
+/*
+ParseToken decrypts the provided token and returns a JWT token object
+*/
+func (s *JWTService) ParseToken(tokenFromHeader string) (*jwt.Token, error) {
 	var result *jwt.Token
 	var decryptedToken string
 	var err error
@@ -154,7 +176,7 @@ func (s *JWTService) Parse(tokenFromHeader, authSecret string) (*jwt.Token, erro
 	/*
 	 * Decrypt token first
 	 */
-	if decryptedToken, err = s.DecryptToken(tokenFromHeader); err != nil {
+	if decryptedToken, err = s.decryptToken(tokenFromHeader); err != nil {
 		return result, errors.Wrapf(err, "Problem decrypting JWT token in Parse")
 	}
 
@@ -165,7 +187,7 @@ func (s *JWTService) Parse(tokenFromHeader, authSecret string) (*jwt.Token, erro
 			return result, ErrInvalidToken
 		}
 
-		return []byte(authSecret), nil
+		return []byte(s.authSecret), nil
 	}); err != nil {
 		return result, errors.Wrapf(err, "Problem parsing JWT token")
 	}
@@ -199,7 +221,7 @@ func (s *JWTService) IsTokenValid(token *jwt.Token) error {
 		return ErrInvalidToken
 	}
 
-	if claims.Issuer != s.Issuer {
+	if claims.Issuer != s.issuer {
 		return ErrInvalidIssuer
 	}
 
@@ -207,7 +229,7 @@ func (s *JWTService) IsTokenValid(token *jwt.Token) error {
 }
 
 func (s *JWTService) generateAESKey() []byte {
-	return pbkdf2.Key([]byte(s.AuthSecret), []byte(s.AuthSalt), 4096, 32, sha1.New)
+	return pbkdf2.Key([]byte(s.authSecret), []byte(s.authSalt), 4096, 32, sha1.New)
 }
 
 func (s *JWTService) pkcs5Padding(content []byte) []byte {
