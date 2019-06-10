@@ -1,6 +1,6 @@
 github.com/app-nerds/fireplace v0.0.0-20190305053416-10b6a594f347/go.mod h1:+lRP34qFPU7ZK9V3z09y5BQqUK8K31flM4UOov7YbLU=
+github.com/app-nerds/kit v0.0.0-20190610023944-0691511defe2 h1:iobMWLXnICvFWFGCo8yLvFJHORBGkvSFbw3mg5X0KyM=
 github.com/app-nerds/kit/datetime v0.0.0-20190222034645-0b88e6e25e42/go.mod h1:1eT2l7o2O3Wz7TS4ABloouAYVtVOMGPlR04R+MWUQLk=
-github.com/app-nerds/kit/rendering v0.0.0-20190222035509-8abe81d0c8c7 h1:+BAyNnlQgYm0j8gg2oizPpXSdSwgXsdC16Hmdvpgqc8=
 github.com/app-nerds/kit/rendering v0.0.0-20190222035509-8abe81d0c8c7/go.mod h1:5RsG/zEkC1ys6LD2BTk9BD+mSG3QRkyE7nHzteo7lic=
 github.com/app-nerds/kit/restclient v0.0.0-20190222035509-8abe81d0c8c7/go.mod h1:foHnWfe4liGWEgrMIPcWcwz4l6WKDFsCCoBOACii52c=
 github.com/app-nerds/kit/sanitizer v0.0.0-20190222034645-0b88e6e25e42/go.mod h1:txF109hZJ9caT7tPTkwoDboQ33W2Fezdf6dD+x4W6Ic=

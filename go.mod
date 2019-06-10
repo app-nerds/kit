@@ -1,4 +1,4 @@
-module github.com/app-nerds/kit
+module github.com/app-nerds/kit/v3
 
 go 1.12
 
