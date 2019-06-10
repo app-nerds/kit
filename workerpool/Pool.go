@@ -13,7 +13,7 @@ for a worker to become available before returning a timeout error.
 		"fmt"
 		"time"
 
-		"github.com/app-nerds/kit/workerpool"
+		"github.com/app-nerds/kit/v3/workerpool"
 	)
 
 	type Job struct {
