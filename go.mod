@@ -5,12 +5,13 @@ go 1.12
 require (
 	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/app-nerds/fireplace v0.0.0-20190305053416-10b6a594f347
+	github.com/app-nerds/gobucketserver v0.0.0-20190516020730-5b692e1a020d // indirect
+	github.com/app-nerds/kit/database v0.0.0-20190412023838-7554954cbb81
 	github.com/cbroglie/mustache v1.0.1
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fatih/color v1.7.0
 	github.com/globalsign/mgo v0.0.0-20181015135952-eeefdecb41b8
-	github.com/go-ole/go-ole v1.2.4 // indirect
 	github.com/labstack/echo v3.3.10+incompatible
 	github.com/labstack/echo/v4 v4.1.6
 	github.com/labstack/gommon v0.2.9
@@ -23,6 +24,5 @@ require (
 	github.com/shirou/gopsutil v2.18.12+incompatible
 	github.com/sirupsen/logrus v1.4.2
 	golang.org/x/crypto v0.0.0-20190605123033-f99c8df09eb5
-	gopkg.in/alexcesaro/quotedprintable.v3 v3.0.0-20150716171945-2caba252f4dc // indirect
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
