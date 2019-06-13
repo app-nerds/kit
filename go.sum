@@ -39,6 +39,7 @@ github.com/app-nerds/kit/sanitizer v0.0.0-20190222034645-0b88e6e25e42/go.mod h1:
 github.com/app-nerds/kit/sanitizer v0.0.0-20190223185829-79aec101235d/go.mod h1:aio7C25tGExHR5I184f2WC8k0i1/TEJyL+xk266Nf/s=
 github.com/app-nerds/kit/sanitizer v0.0.0-20190412023838-7554954cbb81 h1:DB0oNBhYTIM5c2rtS3MzhE34jhhO8wPD33WkyT1O7Ck=
 github.com/app-nerds/kit/sanitizer v0.0.0-20190412023838-7554954cbb81/go.mod h1:aio7C25tGExHR5I184f2WC8k0i1/TEJyL+xk266Nf/s=
+github.com/app-nerds/kit/serverstats v0.0.0-20190222035509-8abe81d0c8c7 h1:Ut/bVrADoB8EdkY+y+XcV5jHXYM8u3Cy2vpieOclha4=
 github.com/app-nerds/kit/serverstats v0.0.0-20190222035509-8abe81d0c8c7/go.mod h1:XvLlLD33K7O8ZqTPgoHLFegvND7KLReDfXzGCnhPbXs=
 github.com/app-nerds/kit/serverstats v0.0.0-20190412023838-7554954cbb81 h1:VE3mDwrW5UnIiIx0E9yhZ7LQgFzNHa8143Tpm7oQjdI=
 github.com/app-nerds/kit/serverstats v0.0.0-20190412023838-7554954cbb81/go.mod h1:F/fxN8GLzLNCycuYCS5PHD74HxKpPtHMEwZwHuHGn4g=
