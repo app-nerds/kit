@@ -427,7 +427,7 @@ Upload uploads a file into the MongoDB GridFS system
 */
 func (u *MongoUploader) Upload(reader io.Reader, name, path string) (*DatabaseUploadResponse, error) {
 	var err error
-	var file *MongoGridFile
+	var file GridFile
 
 	result := &DatabaseUploadResponse{}
 	totalBytesWritten := 0
