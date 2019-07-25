@@ -7,8 +7,8 @@ import (
 	"io/ioutil"
 	"reflect"
 
-	"github.com/app-nerds/kit/v3/datetime"
-	"github.com/app-nerds/kit/v3/sanitizer"
+	"github.com/app-nerds/kit/v4/datetime"
+	"github.com/app-nerds/kit/v4/sanitizer"
 	"github.com/labstack/echo/v4"
 	"github.com/pkg/errors"
 	"github.com/sirupsen/logrus"

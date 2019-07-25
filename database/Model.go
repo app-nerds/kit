@@ -76,6 +76,7 @@ type Collection interface {
 	RemoveAll(selector interface{}) (*mgo.ChangeInfo, error)
 	RemoveId(id interface{}) error
 	Update(selector interface{}, update interface{}) error
+	UpdateAll(selector interface{}, update interface{}) (*mgo.ChangeInfo, error)
 	UpdateId(id interface{}, update interface{}) error
 	Upsert(selector interface{}, update interface{}) (*mgo.ChangeInfo, error)
 	UpsertId(id interface{}, update interface{}) (*mgo.ChangeInfo, error)
@@ -145,6 +146,10 @@ func (c *MongoCollection) RemoveId(id interface{}) error {
 
 func (c *MongoCollection) Update(selector interface{}, update interface{}) error {
 	return c.Collection.Update(selector, update)
+}
+
+func (c *MongoCollection) UpdateAll(selector interface{}, update interface{}) (*mgo.ChangeInfo, error) {
+	return c.Collection.UpdateAll(selector, update)
 }
 
 func (c *MongoCollection) UpdateId(id interface{}, update interface{}) error {

@@ -1,13 +1,14 @@
-module github.com/app-nerds/kit/v3
+module github.com/app-nerds/kit/v4
 
 go 1.12
 
+replace github.com/app-nerds/kit/v4 => /Users/adampresley/kit
+
 require (
-	github.com/StackExchange/wmi v0.0.0-20190523213315-cbe66965904d // indirect
 	github.com/app-nerds/fireplace v0.0.0-20190305053416-10b6a594f347
-	github.com/app-nerds/gobucketserver v0.0.0-20190516020730-5b692e1a020d // indirect
-	github.com/app-nerds/kit/database v0.0.0-20190412023838-7554954cbb81
+	github.com/app-nerds/kit/v3 v3.1.0
 	github.com/cbroglie/mustache v1.0.1
+	github.com/codingconcepts/env v0.0.0-20190614135724-bb4545dff6a4 // indirect
 	github.com/dgrijalva/jwt-go v3.2.0+incompatible
 	github.com/dustin/go-humanize v1.0.0
 	github.com/fatih/color v1.7.0

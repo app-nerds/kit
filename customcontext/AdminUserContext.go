@@ -4,7 +4,7 @@
 
 package customcontext
 
-import "github.com/labstack/echo"
+import "github.com/labstack/echo/v4"
 
 type AdminUserContext struct {
 	echo.Context
