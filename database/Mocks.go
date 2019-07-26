@@ -52,6 +52,7 @@ type CollectionMock struct {
 	RemoveAllFunc      func(selector interface{}) (*mgo.ChangeInfo, error)
 	RemoveIdFunc       func(id interface{}) error
 	UpdateFunc         func(selector interface{}, update interface{}) error
+	UpdateAllFunc      func(selector interface{}, update interface{}) (*mgo.ChangeInfo, error)
 	UpdateIdFunc       func(id interface{}, update interface{}) error
 	UpsertFunc         func(selector interface{}, update interface{}) (*mgo.ChangeInfo, error)
 	UpsertIdFunc       func(id interface{}, update interface{}) (*mgo.ChangeInfo, error)
@@ -117,6 +118,10 @@ func (c *CollectionMock) Update(selector interface{}, update interface{}) error 
 	return c.UpdateFunc(selector, update)
 }
 
+func (c *CollectionMock) UpdateAll(selector interface{}, update interface{}) (*mgo.ChangeInfo, error) {
+	return c.UpdateAllFunc(selector, update)
+}
+
 func (c *CollectionMock) UpdateId(id interface{}, update interface{}) error {
 	return c.UpdateIdFunc(id, update)
 }
@@ -134,7 +139,7 @@ type QueryMock struct {
 	CountFunc    func() (int, error)
 	DistinctFunc func(key string, result interface{}) error
 	LimitFunc    func(n int) Query
-	OneFunc      func(result interface{}) (err error)
+	OneFunc      func(result interface{}) error
 	SelectFunc   func(selector interface{}) Query
 	SkipFunc     func(n int) Query
 	SortFunc     func(fields ...string) Query
@@ -156,7 +161,7 @@ func (q *QueryMock) Limit(n int) Query {
 	return q.LimitFunc(n)
 }
 
-func (q *QueryMock) One(result interface{}) (err error) {
+func (q *QueryMock) One(result interface{}) error {
 	return q.OneFunc(result)
 }
 
