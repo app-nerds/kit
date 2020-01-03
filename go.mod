@@ -2,8 +2,6 @@ module github.com/app-nerds/kit/v4
 
 go 1.12
 
-replace github.com/app-nerds/kit/v4 => /Users/adampresley/kit
-
 require (
 	github.com/app-nerds/fireplace v0.0.0-20190305053416-10b6a594f347
 	github.com/app-nerds/kit/v3 v3.1.0
