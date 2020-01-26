@@ -10,8 +10,6 @@ Unless required by applicable law or agreed to in writing, software distributed 
 package passwords
 
 import (
-	"encoding/hex"
-
 	"golang.org/x/crypto/bcrypt"
 )
 
@@ -27,6 +25,5 @@ func HashPassword(password string) (string, error) {
 		return result, err
 	}
 
-	result = hex.EncodeToString(passwordBytes)
-	return result, nil
+	return string(passwordBytes), nil
 }
