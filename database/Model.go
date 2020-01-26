@@ -257,8 +257,9 @@ func (gfs *MongoGridFS) OpenId(id interface{}) (GridFile, error) {
 func (gfs *MongoGridFS) Remove(name string) error {
 	return gfs.GridFS.Remove(name)
 }
+
 func (gfs *MongoGridFS) RemoveId(id interface{}) error {
-	return gfs.RemoveId(id)
+	return gfs.GridFS.RemoveId(id)
 }
 
 // GridFile represents a single file in GridFS
