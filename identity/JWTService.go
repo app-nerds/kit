@@ -5,7 +5,6 @@
 package identity
 
 import (
-	"bytes"
 	"crypto/aes"
 	"crypto/cipher"
 	"crypto/rand"
@@ -86,7 +85,7 @@ func (s *JWTService) decryptToken(token string) (string, error) {
 
 	key := s.generateAESKey()
 
-	if unencodedToken, err = base64.StdEncoding.DecodeString(token); err != nil {
+	if unencodedToken, err = base64.RawStdEncoding.DecodeString(token); err != nil {
 		return "", errors.Wrapf(err, "Unable to base64 decode JWT token")
 	}
 
@@ -137,7 +136,7 @@ func (s *JWTService) encryptToken(token string) (string, error) {
 	io.ReadFull(rand.Reader, nonce)
 
 	encryptedResult = gcm.Seal(nonce, nonce, []byte(token), nil)
-	encodedResult := base64.StdEncoding.EncodeToString(encryptedResult)
+	encodedResult := base64.RawStdEncoding.EncodeToString(encryptedResult)
 
 	return encodedResult, nil
 }
@@ -158,9 +157,9 @@ NewJWTService creates a new instance of the JWTService struct
 */
 func NewJWTService(config *JWTServiceConfig) *JWTService {
 	return &JWTService{
-		authSalt: config.AuthSalt,
-		authSecret: config.AuthSecret,
-		issuer: config.Issuer,
+		authSalt:         config.AuthSalt,
+		authSecret:       config.AuthSecret,
+		issuer:           config.Issuer,
 		timeoutInMinutes: config.TimeoutInMinutes,
 	}
 }
@@ -232,8 +231,8 @@ func (s *JWTService) generateAESKey() []byte {
 	return pbkdf2.Key([]byte(s.authSecret), []byte(s.authSalt), 4096, 32, sha1.New)
 }
 
-func (s *JWTService) pkcs5Padding(content []byte) []byte {
-	padding := aes.BlockSize - len(content)%aes.BlockSize
-	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
-	return append(content, padtext...)
-}
+// func (s *JWTService) pkcs5Padding(content []byte) []byte {
+// 	padding := aes.BlockSize - len(content)%aes.BlockSize
+// 	padtext := bytes.Repeat([]byte{byte(padding)}, padding)
+// 	return append(content, padtext...)
+// }
