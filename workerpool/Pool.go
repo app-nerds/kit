@@ -1,50 +1,6 @@
 /*
-Copyright 2018-2019 AppNinjas LLC. All rights reserved
-Use of this source code is governed by the MIT license.
-
-Package workerpool implements a pool of workers (goroutines) who
-can perform jobs. Below is an example of a pool that has
-10 workers, and if none are available will wait 2 seoncds
-for a worker to become available before returning a timeout error.
-
-	package main
-
-	import (
-		"fmt"
-		"time"
-
-		"github.com/app-nerds/kit/v3/workerpool"
-	)
-
-	type Job struct {
-		Index int
-	}
-
-	func (j *Job) Work(workerID int) {
-		fmt.Printf("Worker %d sleeping on index %d...\n", workerID, j.Index)
-		time.Sleep(2 * time.Second)
-	}
-
-	func main() {
-		var pool workerpool.IPool
-
-		pool = workerpool.NewPool(workerpool.PoolConfig{
-			MaxJobQueue:       100,
-			MaxWorkers:        10,
-			MaxWorkerWaitTime: 3 * time.Second,
-		})
-
-		pool.Start()
-
-		for index := 0; index < 30; index++ {
-			job := &Job{Index: index}
-			pool.QueueJob(job)
-		}
-
-		pool.Wait()
-		pool.Shutdown()
-	}
-*/
+ * Copyright (c) 2020. App Nerds LLC. All rights reserved
+ */
 package workerpool
 
 import (

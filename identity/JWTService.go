@@ -1,6 +1,6 @@
-// Copyright 2018 AppNinjas. All rights reserved
-// Use of this source code is governed by the MIT license
-// that can be found in the LICENSE file.
+/*
+ * Copyright (c) 2020. App Nerds LLC. All rights reserved
+ */
 
 package identity
 
@@ -20,6 +20,7 @@ import (
 
 type IJWTService interface {
 	CreateToken(createRequest *CreateTokenRequest) (string, error)
+	GetAdditionalDataFromToken(token *jwt.Token) map[string]interface{}
 	GetUserFromToken(token *jwt.Token) (string, string)
 	ParseToken(tokenFromHeader string) (*jwt.Token, error)
 	IsTokenValid(token *jwt.Token) error
@@ -139,6 +140,16 @@ func (s *JWTService) encryptToken(token string) (string, error) {
 	encodedResult := base64.RawStdEncoding.EncodeToString(encryptedResult)
 
 	return encodedResult, nil
+}
+
+/*
+GetAdditionalDataFromToken retrieves the additional data from the claims object
+*/
+func (s *JWTService) GetAdditionalDataFromToken(token *jwt.Token) map[string]interface{} {
+	var claims *Claims
+
+	claims, _ = token.Claims.(*Claims)
+	return claims.AdditionalData
 }
 
 /*

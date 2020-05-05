@@ -1,3 +1,7 @@
+/*
+ * Copyright (c) 2020. App Nerds LLC. All rights reserved
+ */
+
 package database_test
 
 import (
