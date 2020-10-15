@@ -132,7 +132,7 @@ func (c *MongoCollection) FindWithPaging(query interface{}, skip, limit int) (Qu
 		count  int
 	)
 
-	result = &MongoQuery{Query: c.Collection.Find(query)}
+	result = &MongoQuery{Query: c.Collection.Find(query).Skip(skip).Limit(limit)}
 	count, err = c.Collection.Find(query).Count()
 
 	return result, count, err
