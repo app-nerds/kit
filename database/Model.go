@@ -73,6 +73,7 @@ type Collection interface {
 	EnsureIndex(index mgo.Index) error
 	EnsureIndexKey(key ...string) error
 	Find(query interface{}) Query
+	FindWithPaging(query interface{}, skip, limit int) (Query, int, error)
 	FindId(id interface{}) Query
 	Indexes() ([]mgo.Index, error)
 	Insert(docs ...interface{}) error
@@ -122,6 +123,19 @@ func (c *MongoCollection) EnsureIndexKey(key ...string) error {
 // Find shadows *mgo.Collection to returns a Query interface instead of *mgo.Query.
 func (c *MongoCollection) Find(query interface{}) Query {
 	return &MongoQuery{Query: c.Collection.Find(query)}
+}
+
+func (c *MongoCollection) FindWithPaging(query interface{}, skip, limit int) (Query, int, error) {
+	var (
+		err    error
+		result Query
+		count  int
+	)
+
+	result = &MongoQuery{Query: c.Collection.Find(query)}
+	count, err = c.Collection.Find(query).Count()
+
+	return result, count, err
 }
 
 func (c *MongoCollection) FindId(id interface{}) Query {
