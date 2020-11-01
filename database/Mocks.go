@@ -50,6 +50,7 @@ type CollectionMock struct {
 	EnsureIndexKeyFunc func(key ...string) error
 	FindFunc           func(query interface{}) Query
 	FindIdFunc         func(id interface{}) Query
+	FindWithPagingFunc func(query interface{}, skip, limit int) (Query, int, error)
 	IndexesFunc        func() ([]mgo.Index, error)
 	InsertFunc         func(docs ...interface{}) error
 	RemoveFunc         func(selector interface{}) error
@@ -96,6 +97,10 @@ func (c *CollectionMock) Find(query interface{}) Query {
 
 func (c *CollectionMock) FindId(id interface{}) Query {
 	return c.FindIdFunc(id)
+}
+
+func (c *CollectionMock) FindWithPaging(query interface{}, skip, limit int) (Query, int, error) {
+	return c.FindWithPagingFunc(query, skip, limit)
 }
 
 func (c *CollectionMock) Indexes() ([]mgo.Index, error) {

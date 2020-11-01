@@ -18,6 +18,11 @@ import (
 	"github.com/shirou/gopsutil/mem"
 )
 
+type ServerStatsOptions struct {
+	NumMemStatsToKeep      int
+	NumResponseTimesToKeep int
+}
+
 /*
 ServerStats tracks general server statistics. This includes information
 about uptime, response times and counts, and requests counts broken
@@ -31,6 +36,7 @@ type ServerStats struct {
 	Uptime                  time.Time              `json:"uptime"`
 	RequestCount            uint64                 `json:"requestCount"`
 	ResponseTimes           *ring.Ring
+	StatsByDayCollection    StatsByDayCollection
 	Statuses                map[string]int `json:"statuses"`
 	customMiddleware        func(ctx echo.Context, serverStats *ServerStats)
 
@@ -48,6 +54,20 @@ func NewServerStats(customMiddleware func(ctx echo.Context, serverStats *ServerS
 		CustomStats:             make(map[string]interface{}),
 		Uptime:                  time.Now().UTC(),
 		ResponseTimes:           ring.New(1000),
+		Statuses:                make(map[string]int),
+
+		RWMutex: sync.RWMutex{},
+	}
+}
+
+func NewServerStatsWithOptions(options ServerStatsOptions, customMiddleware func(ctx echo.Context, serverStats *ServerStats)) *ServerStats {
+	return &ServerStats{
+		AverageFreeSystemMemory: ring.New(options.NumMemStatsToKeep),
+		AverageMemoryUsage:      ring.New(options.NumMemStatsToKeep),
+		customMiddleware:        customMiddleware,
+		CustomStats:             make(map[string]interface{}),
+		Uptime:                  time.Now().UTC(),
+		ResponseTimes:           ring.New(options.NumResponseTimesToKeep),
 		Statuses:                make(map[string]int),
 
 		RWMutex: sync.RWMutex{},
@@ -276,6 +296,98 @@ func (s *ServerStats) Middleware(next echo.HandlerFunc) echo.HandlerFunc {
 		}
 
 		return nil
+	}
+}
+
+/*
+NewMiddlewareWithTimeTracking returns a middleware that tracks stats by day and hour. You
+provide it a pointer to a StatsByDayCollection and this will update stats grouped by
+day (starting at midnight) and hour.
+*/
+// TODO: Perhaps keep the statsByDayCollection in ServerStats locally. cause otherwise this ain't working
+func (s *ServerStats) NewMiddlewareWithTimeTracking() echo.MiddlewareFunc {
+	return func(next echo.HandlerFunc) echo.HandlerFunc {
+		return func(ctx echo.Context) error {
+			var err error
+
+			startTime := time.Now()
+
+			if err = next(ctx); err != nil {
+				ctx.Error(err)
+			}
+
+			endTime := time.Since(startTime)
+
+			s.Lock()
+			defer s.Unlock()
+
+			/*
+			 * Get the date starting at midnight, and the hour integer
+			 */
+			day := time.Date(startTime.Year(), startTime.Month(), startTime.Day(), 0, 0, 0, 0, startTime.Location())
+			hour := startTime.Hour()
+
+			s.RequestCount++
+
+			s.ResponseTimes = s.ResponseTimes.Next()
+			s.ResponseTimes.Value = ResponseTime{
+				ExecutionTime: endTime,
+				Time:          startTime.UTC(),
+			}
+
+			s.AverageFreeSystemMemory = s.AverageFreeSystemMemory.Next()
+			s.AverageMemoryUsage = s.AverageMemoryUsage.Next()
+
+			memStats := &runtime.MemStats{}
+			runtime.ReadMemStats(memStats)
+
+			var vMemStats *mem.VirtualMemoryStat
+			vMemStats, _ = mem.VirtualMemory()
+
+			s.AverageFreeSystemMemory.Value = vMemStats.Available
+			s.AverageMemoryUsage.Value = memStats.Sys
+
+			status := strconv.Itoa(ctx.Response().Status)
+			s.Statuses[status]++
+
+			if s.customMiddleware != nil {
+				s.customMiddleware(ctx, s)
+			}
+
+			/*
+			 * Find the day and hour, then update the hour structure
+			 */
+			var byDay *StatsByDay
+			var byHour *StatsByHour
+
+			for _, d := range s.StatsByDayCollection {
+				if d.Date.Equal(day) {
+					byDay = d
+					break
+				}
+			}
+
+			if byDay != nil {
+				for _, h := range byDay.HourlyStats {
+					if h.Hour == hour {
+						byHour = h
+						break
+					}
+				}
+			} else {
+				byDay = NewStatsByDay(day)
+				byHour = NewStatsByHour(hour)
+
+				byDay.HourlyStats = append(byDay.HourlyStats, byHour)
+				s.StatsByDayCollection = append(s.StatsByDayCollection, byDay)
+			}
+
+			if byHour != nil {
+				byHour.Calculate(s)
+			}
+
+			return nil
+		}
 	}
 }
 

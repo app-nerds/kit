@@ -25,3 +25,6 @@ _testmain.go
 *.coverprofile
 
 .DS_Store
+.undodir
+*.swp
+
