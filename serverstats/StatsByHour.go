@@ -40,6 +40,9 @@ func (sbh *StatsByHour) Calculate(s *ServerStats) {
 	var averageFreeMemory uint64
 	var averageMemoryUsage uint64
 
+	sbh.RWMutex.Lock()
+	defer sbh.RWMutex.Unlock()
+
 	averageResponseTime = 0
 	numResponses = 0
 
