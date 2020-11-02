@@ -359,6 +359,7 @@ func (s *ServerStats) NewMiddlewareWithTimeTracking() echo.MiddlewareFunc {
 			 */
 			var byDay *StatsByDay
 			var byHour *StatsByHour
+			resetStats := false
 
 			for _, d := range s.StatsByDayCollection {
 				if d.Date.Equal(day) {
@@ -374,15 +375,28 @@ func (s *ServerStats) NewMiddlewareWithTimeTracking() echo.MiddlewareFunc {
 						break
 					}
 				}
+
+				if byHour == nil {
+					byHour = NewStatsByHour(hour)
+					byDay.HourlyStats = append(byDay.HourlyStats, byHour)
+
+					resetStats = true
+				}
 			} else {
 				byDay = NewStatsByDay(day)
 				byHour = NewStatsByHour(hour)
+				resetStats = true
 
 				byDay.HourlyStats = append(byDay.HourlyStats, byHour)
 				s.StatsByDayCollection = append(s.StatsByDayCollection, byDay)
 			}
 
 			if byHour != nil {
+				if resetStats {
+					s.RequestCount = 0
+					s.Statuses = make(map[string]int)
+				}
+
 				byHour.Calculate(s)
 			}
 
