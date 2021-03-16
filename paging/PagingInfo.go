@@ -71,4 +71,8 @@ func (p *PagingInfo) Calculate(currentPage, pageSize, totalItems int) {
 	if p.End > totalItems {
 		p.End = totalItems
 	}
+
+	if totalItems <= 0 {
+		p.TotalPages = 0
+	}
 }
