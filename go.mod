@@ -1,6 +1,6 @@
 module github.com/app-nerds/kit/v4
 
-go 1.15
+go 1.16
 
 require (
 	github.com/app-nerds/fireplace v0.0.0-20190305053416-10b6a594f347
