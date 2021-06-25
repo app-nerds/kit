@@ -25,7 +25,7 @@ func Get(response *http.Response, successReceiver, errorReceiver interface{}) (b
 	}
 
 	if strings.Contains(contentType, "application/json") {
-		return getJson(response, p)
+		return getJSON(response, p)
 	}
 
 	return getString(response, p)
@@ -35,7 +35,7 @@ func isSuccess(response *http.Response) bool {
 	return response.StatusCode >= 200 && response.StatusCode < 300
 }
 
-func getJson(response *http.Response, receiver interface{}) (bool, error) {
+func getJSON(response *http.Response, receiver interface{}) (bool, error) {
 	b, _ := io.ReadAll(response.Body)
 	err := json.Unmarshal(b, receiver)
 

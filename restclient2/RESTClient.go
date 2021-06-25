@@ -5,7 +5,7 @@
 package restclient2
 
 /*
-RestClient defines an interface for working with RESTful endpoints
+RESTClient defines an interface for working with RESTful endpoints
 */
 type RESTClient interface {
 	DELETE(path string, successReceiver, errorReceiver interface{}) (bool, error)

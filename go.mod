@@ -1,4 +1,4 @@
-module github.com/app-nerds/kit/v4
+module github.com/app-nerds/kit/v5
 
 go 1.16
 
