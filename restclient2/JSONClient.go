@@ -65,6 +65,7 @@ func (c JSONClient) DELETE(path string, successReceiver, errorReceiver interface
 		return false, fmt.Errorf("error executing request: %w", err)
 	}
 
+	defer response.Body.Close()
 	return responsegetter.Get(response, successReceiver, errorReceiver)
 }
 
@@ -95,6 +96,7 @@ func (c JSONClient) GET(path string, successReceiver, errorReceiver interface{})
 		return false, fmt.Errorf("error executing request: %w", err)
 	}
 
+	defer response.Body.Close()
 	return responsegetter.Get(response, successReceiver, errorReceiver)
 }
 
@@ -125,6 +127,7 @@ func (c JSONClient) POST(path string, body, successReceiver, errorReceiver inter
 		return false, fmt.Errorf("error executing request: %w", err)
 	}
 
+	defer response.Body.Close()
 	return responsegetter.Get(response, successReceiver, errorReceiver)
 }
 
@@ -155,6 +158,7 @@ func (c JSONClient) PUT(path string, body, successReceiver, errorReceiver interf
 		return false, fmt.Errorf("error executing request: %w", err)
 	}
 
+	defer response.Body.Close()
 	return responsegetter.Get(response, successReceiver, errorReceiver)
 }
 
