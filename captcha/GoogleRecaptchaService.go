@@ -10,7 +10,7 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/app-nerds/kit/v4/restclient"
+	"github.com/app-nerds/kit/v5/restclient"
 )
 
 type GoogleRecaptchaServiceConfig struct {

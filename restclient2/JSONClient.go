@@ -12,7 +12,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/app-nerds/kit/v4/restclient2/responsegetter"
+	"github.com/app-nerds/kit/v5/restclient2/responsegetter"
 )
 
 /*

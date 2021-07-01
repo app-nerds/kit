@@ -10,8 +10,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/app-nerds/kit/v4/database"
-	"github.com/app-nerds/kit/v4/mongocertstore"
+	"github.com/app-nerds/kit/v5/database"
+	"github.com/app-nerds/kit/v5/mongocertstore"
 	"github.com/globalsign/mgo"
 	"golang.org/x/crypto/acme/autocert"
 )

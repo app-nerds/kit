@@ -9,7 +9,7 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/app-nerds/kit/v4/customcontext"
+	"github.com/app-nerds/kit/v5/customcontext"
 	"github.com/labstack/echo/v4"
 )
 
