@@ -283,6 +283,18 @@ type Rows interface {
 }
 
 /*
+Scanner describes a strut that can scan columns from a record
+*/
+type Scanner interface {
+	/*
+		Scan copies the columns into values pointed at by dest. The number
+		of values in dest must be the same as the number of
+		columns.
+	*/
+	Scan(dst ...interface{}) error
+}
+
+/*
 Stmt is a prepared statement. A Stmt is safe for concurrent use by multiple
 goroutines.
 
