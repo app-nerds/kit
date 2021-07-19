@@ -35,6 +35,11 @@ type MockDB struct {
 	SetMaxOpenConnsFunc    func(n int)
 }
 
+type MockResult struct {
+	LastInsertIdFunc func() (int64, error)
+	RowsAffectedFunc func() (int64, error)
+}
+
 type MockRow struct {
 	ErrFunc  func() error
 	ScanFunc func(dest ...interface{}) error
@@ -167,6 +172,17 @@ func (m *MockDB) SetMaxIdleConns(n int) {
 
 func (m *MockDB) SetMaxOpenConns(n int) {
 	m.SetMaxOpenConnsFunc(n)
+}
+
+/********************************************************************
+ * MockResult
+ *******************************************************************/
+func (m *MockResult) LastInsertId() (int64, error) {
+	return m.LastInsertIdFunc()
+}
+
+func (m *MockResult) RowsAffected() (int64, error) {
+	return m.RowsAffectedFunc()
 }
 
 /********************************************************************
