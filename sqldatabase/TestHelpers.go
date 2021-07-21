@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"fmt"
 	"reflect"
+	"time"
 )
 
 var (
@@ -12,9 +13,11 @@ var (
 	KindBool          reflect.Kind = reflect.Bool
 	KindFloat32       reflect.Kind = reflect.Float32
 	KindFloat64       reflect.Kind = reflect.Float64
+	KindTime          reflect.Kind = reflect.TypeOf(time.Time{}).Kind()
 	KindSqlNullString reflect.Kind = reflect.TypeOf(sql.NullString{}).Kind()
 	KindSqlNullInt32  reflect.Kind = reflect.TypeOf(sql.NullInt32{}).Kind()
 	KindSqlNullInt64  reflect.Kind = reflect.TypeOf(sql.NullInt64{}).Kind()
+	KindSqlNullTime   reflect.Kind = reflect.TypeOf(sql.NullTime{}).Kind()
 )
 
 /*
@@ -149,6 +152,17 @@ func AssignScanValue(mappings ScanMapping, rowIndex, colIndex int, dest interfac
 
 	default:
 		switch reflect.TypeOf(mappings[rowIndex][colIndex].Value).String() {
+		case "time.Time":
+			var value time.Time
+			p := dest.(*time.Time)
+
+			if value, ok = mappings[rowIndex][colIndex].Value.(time.Time); !ok {
+				wrongType(rowIndex, colIndex, "time.Time")
+				return
+			}
+
+			*p = value
+
 		case "sql.NullString":
 			var value sql.NullString
 			p := dest.(*sql.NullString)
@@ -177,6 +191,17 @@ func AssignScanValue(mappings ScanMapping, rowIndex, colIndex int, dest interfac
 
 			if value, ok = mappings[rowIndex][colIndex].Value.(sql.NullInt64); !ok {
 				wrongType(rowIndex, colIndex, "sql.NullInt64")
+				return
+			}
+
+			*p = value
+
+		case "sql.NullTime":
+			var value sql.NullTime
+			p := dest.(*sql.NullTime)
+
+			if value, ok = mappings[rowIndex][colIndex].Value.(sql.NullTime); !ok {
+				wrongType(rowIndex, colIndex, "sql.NullTime")
 				return
 			}
 
