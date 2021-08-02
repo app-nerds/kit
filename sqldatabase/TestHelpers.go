@@ -8,16 +8,17 @@ import (
 )
 
 var (
-	KindString        reflect.Kind = reflect.String
-	KindInt           reflect.Kind = reflect.Int64
-	KindBool          reflect.Kind = reflect.Bool
-	KindFloat32       reflect.Kind = reflect.Float32
-	KindFloat64       reflect.Kind = reflect.Float64
-	KindTime          reflect.Kind = reflect.TypeOf(time.Time{}).Kind()
-	KindSqlNullString reflect.Kind = reflect.TypeOf(sql.NullString{}).Kind()
-	KindSqlNullInt32  reflect.Kind = reflect.TypeOf(sql.NullInt32{}).Kind()
-	KindSqlNullInt64  reflect.Kind = reflect.TypeOf(sql.NullInt64{}).Kind()
-	KindSqlNullTime   reflect.Kind = reflect.TypeOf(sql.NullTime{}).Kind()
+	KindString         reflect.Kind = reflect.String
+	KindInt            reflect.Kind = reflect.Int64
+	KindBool           reflect.Kind = reflect.Bool
+	KindFloat32        reflect.Kind = reflect.Float32
+	KindFloat64        reflect.Kind = reflect.Float64
+	KindTime           reflect.Kind = reflect.TypeOf(time.Time{}).Kind()
+	KindSqlNullString  reflect.Kind = reflect.TypeOf(sql.NullString{}).Kind()
+	KindSqlNullInt32   reflect.Kind = reflect.TypeOf(sql.NullInt32{}).Kind()
+	KindSqlNullInt64   reflect.Kind = reflect.TypeOf(sql.NullInt64{}).Kind()
+	KindSqlNullTime    reflect.Kind = reflect.TypeOf(sql.NullTime{}).Kind()
+	KindSqlNullFloat64 reflect.Kind = reflect.TypeOf(sql.NullFloat64{}).Kind()
 )
 
 /*
