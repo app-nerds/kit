@@ -207,6 +207,17 @@ func AssignScanValue(mappings ScanMapping, rowIndex, colIndex int, dest interfac
 			}
 
 			*p = value
+
+		case "sql.NullFloat64":
+			var value sql.NullFloat64
+			p := dest.(*sql.NullFloat64)
+
+			if value, ok = mappings[rowIndex][colIndex].Value.(sql.NullFloat64); !ok {
+				wrongType(rowIndex, colIndex, "sql.NullFloat64")
+				return
+			}
+
+			*p = value
 		}
 	}
 }
