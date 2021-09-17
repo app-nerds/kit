@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. App Nerds LLC. All rights reserved
+ * Copyright (c) 2021. App Nerds LLC. All rights reserved
  */
 
 package mongocertstore_test
@@ -10,8 +10,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/app-nerds/kit/v5/database"
-	"github.com/app-nerds/kit/v5/mongocertstore"
+	"github.com/app-nerds/kit/v6/database"
+	"github.com/app-nerds/kit/v6/mongocertstore"
 	"github.com/globalsign/mgo"
 	"golang.org/x/crypto/acme/autocert"
 )

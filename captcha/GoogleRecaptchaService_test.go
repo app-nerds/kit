@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. App Nerds LLC All Rights Reserved
+ * Copyright (c) 2021. App Nerds LLC All Rights Reserved
  */
 
 package captcha_test
@@ -13,8 +13,8 @@ import (
 	"reflect"
 	"testing"
 
-	"github.com/app-nerds/kit/v5/captcha"
-	"github.com/app-nerds/kit/v5/restclient"
+	"github.com/app-nerds/kit/v6/captcha"
+	"github.com/app-nerds/kit/v6/restclient"
 )
 
 func TestNewGoogleRecaptchaService(t *testing.T) {
@@ -77,7 +77,7 @@ func TestGoogleRecaptchaService_VerifyCaptcha(t *testing.T) {
 			name: "Returns a response upon success",
 			fields: fields{
 				captchaSecret: "secret",
-				httpClient: &restclient.MockHttpClient{
+				httpClient: &restclient.MockHTTPClient{
 					DoFunc: func(req *http.Request) (*http.Response, error) {
 						capturedURL = req.URL.String()
 
@@ -106,7 +106,7 @@ func TestGoogleRecaptchaService_VerifyCaptcha(t *testing.T) {
 			name: "Returns an error when the HTTP request fails",
 			fields: fields{
 				captchaSecret: "secret",
-				httpClient: &restclient.MockHttpClient{
+				httpClient: &restclient.MockHTTPClient{
 					DoFunc: func(req *http.Request) (*http.Response, error) {
 						capturedURL = req.URL.String()
 
@@ -126,7 +126,7 @@ func TestGoogleRecaptchaService_VerifyCaptcha(t *testing.T) {
 			name: "Returns an error when there is a problem deserializing the response",
 			fields: fields{
 				captchaSecret: "secret",
-				httpClient: &restclient.MockHttpClient{
+				httpClient: &restclient.MockHTTPClient{
 					DoFunc: func(req *http.Request) (*http.Response, error) {
 						capturedURL = req.URL.String()
 

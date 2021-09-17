@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. App Nerds LLC. All rights reserved
+ * Copyright (c) 2021. App Nerds LLC. All rights reserved
  */
 
 package files
@@ -8,6 +8,9 @@ import (
 	"os"
 )
 
+/*
+FileOpener is an interface useful for mocking os.File for opening files
+*/
 type FileOpener interface {
 	Open(name string) (*os.File, error)
 }

@@ -2,7 +2,7 @@
  * Copyright (c) 2021. App Nerds LLC. All rights reserved
  */
 
-package restclient2
+package restclient
 
 import (
 	"bytes"
@@ -12,7 +12,7 @@ import (
 	"net/http"
 	"strings"
 
-	"github.com/app-nerds/kit/v5/restclient2/responsegetter"
+	"github.com/app-nerds/kit/v6/restclient/responsegetter"
 )
 
 /*
@@ -39,18 +39,15 @@ func NewJSONClient(baseURL string, httpClient HTTPClientInterface) JSONClient {
 }
 
 /*
-DELETE performs an HTTP DELETE operation. You provide a path, which should exclude the
+DELETE performs an HTTP DELETE operation. You provide a path, which should exclude 
 the TLD, as this is defined in BaseURL. If your request requires authorization
 call WithAuthorization first, then DELETE.
 
-Upon a 2xx response the successReceiver will be populated with the returned JSON
-data, and "true,nil" will be returned. If there is an error response from the server
-errorReceiver will be populated, and "false,nil" will be returned.
-
-In the event that an error occured communicating with the server, or some other
-unforseen error occurs, "false,error" is returned.
+If some type of error occurs when creating the request, executing the request,
+or unmarshalling the response, err will be populated. The http.Response is returned
+so callers can inspect the status.
 */
-func (c JSONClient) DELETE(path string, successReceiver, errorReceiver interface{}) (bool, error) {
+func (c JSONClient) DELETE(path string, successReceiver, errorReceiver interface{}) (*http.Response, error) {
 	var (
 		err      error
 		request  *http.Request
@@ -58,15 +55,15 @@ func (c JSONClient) DELETE(path string, successReceiver, errorReceiver interface
 	)
 
 	if request, err = c.createRequest(path, "DELETE", c.authorization, nil); err != nil {
-		return false, err
+		return response, fmt.Errorf("error creating HTTP request: %w", err)
 	}
 
 	if response, err = c.HTTPClient.Do(request); err != nil {
-		return false, fmt.Errorf("error executing request: %w", err)
+		return response, fmt.Errorf("error executing request: %w", err)
 	}
 
 	defer response.Body.Close()
-	return responsegetter.Get(response, successReceiver, errorReceiver)
+	return response, responsegetter.Get(response, successReceiver, errorReceiver)
 }
 
 /*
@@ -74,14 +71,11 @@ GET performs an HTTP GET operation. You provide a path, which should exclude the
 the TLD, as this is defined in BaseURL. If your request requires authorization
 call WithAuthorization first, then GET.
 
-Upon a 2xx response the successReceiver will be populated with the returned JSON
-data, and "true,nil" will be returned. If there is an error response from the server
-errorReceiver will be populated, and "false,nil" will be returned.
-
-In the event that an error occured communicating with the server, or some other
-unforseen error occurs, "false,error" is returned.
+If some type of error occurs when creating the request, executing the request,
+or unmarshalling the response, err will be populated. The http.Response is returned
+so callers can inspect the status.
 */
-func (c JSONClient) GET(path string, successReceiver, errorReceiver interface{}) (bool, error) {
+func (c JSONClient) GET(path string, successReceiver, errorReceiver interface{}) (*http.Response, error) {
 	var (
 		err      error
 		request  *http.Request
@@ -89,15 +83,15 @@ func (c JSONClient) GET(path string, successReceiver, errorReceiver interface{})
 	)
 
 	if request, err = c.createRequest(path, "GET", c.authorization, nil); err != nil {
-		return false, err
+		return response, fmt.Errorf("error creating HTTP request: %w", err)
 	}
 
 	if response, err = c.HTTPClient.Do(request); err != nil {
-		return false, fmt.Errorf("error executing request: %w", err)
+		return response, fmt.Errorf("error executing request: %w", err)
 	}
 
 	defer response.Body.Close()
-	return responsegetter.Get(response, successReceiver, errorReceiver)
+	return response, responsegetter.Get(response, successReceiver, errorReceiver)
 }
 
 /*
@@ -105,14 +99,11 @@ POST performs an HTTP POST operation. You provide a path, which should exclude t
 the TLD, as this is defined in BaseURL. If your request requires authorization
 call WithAuthorization first, then POST.
 
-Upon a 2xx response the successReceiver will be populated with the returned JSON
-data, and "true,nil" will be returned. If there is an error response from the server
-errorReceiver will be populated, and "false,nil" will be returned.
-
-In the event that an error occured communicating with the server, or some other
-unforseen error occurs, "false,error" is returned.
+If some type of error occurs when creating the request, executing the request,
+or unmarshalling the response, err will be populated. The http.Response is returned
+so callers can inspect the status.
 */
-func (c JSONClient) POST(path string, body, successReceiver, errorReceiver interface{}) (bool, error) {
+func (c JSONClient) POST(path string, body, successReceiver, errorReceiver interface{}) (*http.Response, error) {
 	var (
 		err      error
 		request  *http.Request
@@ -120,15 +111,15 @@ func (c JSONClient) POST(path string, body, successReceiver, errorReceiver inter
 	)
 
 	if request, err = c.createRequest(path, "POST", c.authorization, body); err != nil {
-		return false, err
+		return response, fmt.Errorf("error creating HTTP request: %w", err)
 	}
 
 	if response, err = c.HTTPClient.Do(request); err != nil {
-		return false, fmt.Errorf("error executing request: %w", err)
+		return response, fmt.Errorf("error executing request: %w", err)
 	}
 
 	defer response.Body.Close()
-	return responsegetter.Get(response, successReceiver, errorReceiver)
+	return response, responsegetter.Get(response, successReceiver, errorReceiver)
 }
 
 /*
@@ -136,14 +127,11 @@ PUT performs an HTTP PUT operation. You provide a path, which should exclude the
 the TLD, as this is defined in BaseURL. If your request requires authorization
 call WithAuthorization first, then PUT.
 
-Upon a 2xx response the successReceiver will be populated with the returned JSON
-data, and "true,nil" will be returned. If there is an error response from the server
-errorReceiver will be populated, and "false,nil" will be returned.
-
-In the event that an error occured communicating with the server, or some other
-unforseen error occurs, "false,error" is returned.
+If some type of error occurs when creating the request, executing the request,
+or unmarshalling the response, err will be populated. The http.Response is returned
+so callers can inspect the status.
 */
-func (c JSONClient) PUT(path string, body, successReceiver, errorReceiver interface{}) (bool, error) {
+func (c JSONClient) PUT(path string, body, successReceiver, errorReceiver interface{}) (*http.Response, error) {
 	var (
 		err      error
 		request  *http.Request
@@ -151,15 +139,15 @@ func (c JSONClient) PUT(path string, body, successReceiver, errorReceiver interf
 	)
 
 	if request, err = c.createRequest(path, "PUT", c.authorization, body); err != nil {
-		return false, err
+		return response, fmt.Errorf("error creating HTTP request: %w", err)
 	}
 
 	if response, err = c.HTTPClient.Do(request); err != nil {
-		return false, fmt.Errorf("error executing request: %w", err)
+		return response, fmt.Errorf("error executing request: %w", err)
 	}
 
 	defer response.Body.Close()
-	return responsegetter.Get(response, successReceiver, errorReceiver)
+	return response, responsegetter.Get(response, successReceiver, errorReceiver)
 }
 
 /*
@@ -188,6 +176,7 @@ func (c JSONClient) createRequest(path, method, authorization string, body inter
 	)
 
 	upperMethod := strings.ToUpper(method)
+	u := c.buildURL(path)
 
 	if upperMethod != "GET" && body != nil {
 		if b, err = json.Marshal(body); err != nil {
@@ -195,10 +184,13 @@ func (c JSONClient) createRequest(path, method, authorization string, body inter
 		}
 
 		reader = bytes.NewReader(b)
-	}
-
-	if request, err = http.NewRequest(upperMethod, c.buildURL(path), reader); err != nil {
-		return request, fmt.Errorf("error creating HTTP request: %w", err)
+		if request, err = http.NewRequest(upperMethod, u, reader); err != nil {
+			return request, fmt.Errorf("error creating HTTP request: %w", err)
+		}
+	} else if upperMethod == "GET" {
+		if request, err = http.NewRequest(upperMethod, u, nil); err != nil {
+			return request, fmt.Errorf("error creating HTTP request: %w", err)
+		}
 	}
 
 	request.Header.Add("Content-Type", "application/json")

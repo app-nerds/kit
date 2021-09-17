@@ -1,60 +1,18 @@
-# logging Package
+# Logging
 
-The **logging** package provides objects and methods for logging output to the standard output console.
-It allows consumers to output in various formats, including text and JSON. It also supports
-log levels and color.
+This package provides logging-related services.
 
-## Package Methods
+## Fireplace
 
-Below is a reference of exported methods in this package.
+Fireplace is a custom log aggregation server written by App Nerds. It provides a RESTful endpoint for writing log entries which in turn stores them in a MongoDB database. There is also a viewer application that can be used to browse and search log entries. This package provides a method to create a new instance of a [Logrus](https://github.com/sirupsen/logrus) logger that is connected to a Fireplace server.
 
-### LogFactory(logFormat LogFormat, applicationName string, minimumLogLevel LogType) ILogger
-`LogFactory` should be your primary point of entry. This is a factory method that,
-when told what format, log level, and application name is, will return the correct
-logger object. For example, to get a simple logger with a minimum log level output
-of `INFO`:
+To begin you'll need two pieces of information:
 
-```golang
-var logger logging.ILogger
-logger = logging.LogFactory(logging.LOG\_FORMAT\_SIMPLE, "Test Application", logging.INFO)
+* The URL to a Fireplace Server (full URL. e.g. https://someurl.com:8999)
+* The password to the Fireplace Server
+
+### Example
+
+```go
+logger := logging.NewFireplaceLogger("My application", "info", "https://someurl.com:8999", "password", nil)
 ```
-
-### NewJSONLogger(applicationName string, minimumLogLevel LogType) *JSONLogger
-`NewJSONLogger` returns an instance of a new logger that outputs in JSON format. Logs
-written in JSON format output an object to the console. Here is an example of what that
-looks like. Note that an actual log entry would be a single line.
-
-```javascript
-{
-	"applicationName": "Test Application",
-	"type": "INFO",
-	"message": "Database connection established"
-}
-```
-
-### NewSimpleLogger(applicationName string, minimumLogLevel LogType) *SimpleLogger
-`NewSimpleLogger` returns an instance of a new logger that outputs plain text.
-Here is an example of what that looks like.
-
-```text
-Test Application: INFO - Database connection established
-```
-
-### StringToLogFormat(logFormatName string) LogFormat
-`StringToLogFormat` takes a string and attempts to convert it to a LogFormat type.
-A log format represents the format the logger will output. Currently valid values are
-
-* SIMPLE
-* JSON
-
-### StringToLogType(logTypeName string) LogType
-`StringToLogType` takes a string and attempts to convert it to a LogType.
-A log type specifies the types of log entries, such as an error, or information entry.
-The following are the supported log types.
-
-* DEBUG
-* INFO
-* WARN
-* ERROR
-* FATAL
-

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. App Nerds LLC. All rights reserved
+ * Copyright (c) 2021. App Nerds LLC. All rights reserved
  */
 
 package identity
@@ -10,7 +10,7 @@ It contians basic information about a user, and then allows
 for additional data
 */
 type CreateTokenRequest struct {
-	UserID string
-	UserName string
+	UserID         string
+	UserName       string
 	AdditionalData map[string]interface{}
 }

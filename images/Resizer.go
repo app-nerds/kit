@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. App Nerds LLC. All rights reserved
+ * Copyright (c) 2021. App Nerds LLC. All rights reserved
  */
 
 package images
@@ -20,6 +20,7 @@ IResizer is an interface to describe structs that resize images
 */
 type IResizer interface {
 	ResizeImage(source io.ReadSeeker, contentType string, imageSize ImageSize) (*bytes.Buffer, error)
+	ResizeImagePixels(source io.ReadSeeker, contentType string, width, height int) (*bytes.Buffer, error)
 }
 
 /*
@@ -31,10 +32,12 @@ type Resizer struct{}
 ResizeImage takes a source image, content type (MIME), and a image size (
 THUMBNAIL, SMALL, MEDIUM, LARGE) and resizes proportionally.
 */
-func (r *Resizer) ResizeImage(source io.ReadSeeker, contentType string, imageSize ImageSize) (*bytes.Buffer, error) {
-	var err error
-	var result *bytes.Buffer
-	var sourceImage image.Image
+func (r Resizer) ResizeImage(source io.ReadSeeker, contentType string, imageSize ImageSize) (*bytes.Buffer, error) {
+	var (
+		err         error
+		result      *bytes.Buffer
+		sourceImage image.Image
+	)
 
 	if !r.isValidImageFormat(contentType) {
 		return result, ErrInvalidFileType
@@ -61,10 +64,32 @@ func (r *Resizer) ResizeImage(source io.ReadSeeker, contentType string, imageSiz
 	newWidth := r.calculateNewWidth(sourceWidth, percent)
 
 	return r.resizeImage(sourceImage, contentType, newWidth, newHeight)
-
 }
 
-func (r *Resizer) resizeImage(sourceImage image.Image, contentType string, width, height int) (*bytes.Buffer, error) {
+/*
+ResizeImagePixels resizes a source image to the specified widthxheight.
+*/
+func (r Resizer) ResizeImagePixels(source io.ReadSeeker, contentType string, width, height int) (*bytes.Buffer, error) {
+	var (
+		err         error
+		result      *bytes.Buffer
+		sourceImage image.Image
+	)
+
+	if !r.isValidImageFormat(contentType) {
+		return result, ErrInvalidFileType
+	}
+
+	source.Seek(0, 0)
+
+	if sourceImage, err = r.readSourceImage(source); err != nil {
+		return result, err
+	}
+
+	return r.resizeImage(sourceImage, contentType, width, height)
+}
+
+func (r Resizer) resizeImage(sourceImage image.Image, contentType string, width, height int) (*bytes.Buffer, error) {
 	result := new(bytes.Buffer)
 	var err error
 
@@ -80,7 +105,7 @@ func (r *Resizer) resizeImage(sourceImage image.Image, contentType string, width
 	return result, err
 }
 
-func (r *Resizer) readSourceImage(sourceImage io.Reader) (image.Image, error) {
+func (r Resizer) readSourceImage(sourceImage io.Reader) (image.Image, error) {
 	decodedImage, _, err := image.Decode(sourceImage)
 	if err != nil {
 		return nil, err
@@ -88,7 +113,8 @@ func (r *Resizer) readSourceImage(sourceImage io.Reader) (image.Image, error) {
 
 	return decodedImage, nil
 }
-func (r *Resizer) getMultiplierFromSize(imageSize ImageSize) float64 {
+
+func (r Resizer) getMultiplierFromSize(imageSize ImageSize) float64 {
 	if imageSize == THUMBNAIL {
 		return 0.10
 	}
@@ -104,23 +130,23 @@ func (r *Resizer) getMultiplierFromSize(imageSize ImageSize) float64 {
 	return 1.0
 }
 
-func (r *Resizer) calculateHeight(height int, imageSize ImageSize) float64 {
+func (r Resizer) calculateHeight(height int, imageSize ImageSize) float64 {
 	return float64(height) * r.getMultiplierFromSize(imageSize)
 }
 
-func (r *Resizer) calculateWidth(width int, imageSize ImageSize) float64 {
+func (r Resizer) calculateWidth(width int, imageSize ImageSize) float64 {
 	return float64(width) * r.getMultiplierFromSize(imageSize)
 }
 
-func (r *Resizer) calculateHeightChangePercentage(adjustedHeight float64, originalHeight int) float64 {
+func (r Resizer) calculateHeightChangePercentage(adjustedHeight float64, originalHeight int) float64 {
 	return adjustedHeight / float64(originalHeight)
 }
 
-func (r *Resizer) calculateWidthChangePercentage(adjustedWidth float64, originalWidth int) float64 {
+func (r Resizer) calculateWidthChangePercentage(adjustedWidth float64, originalWidth int) float64 {
 	return adjustedWidth / float64(originalWidth)
 }
 
-func (r *Resizer) determinePercentageChangeToMake(widthChangePercentage float64, heightChangePercentage float64) float64 {
+func (r Resizer) determinePercentageChangeToMake(widthChangePercentage float64, heightChangePercentage float64) float64 {
 	if heightChangePercentage < widthChangePercentage {
 		return heightChangePercentage
 	}
@@ -128,15 +154,15 @@ func (r *Resizer) determinePercentageChangeToMake(widthChangePercentage float64,
 	return widthChangePercentage
 }
 
-func (r *Resizer) calculateNewHeight(originalHeight int, percentageChange float64) int {
+func (r Resizer) calculateNewHeight(originalHeight int, percentageChange float64) int {
 	return int(float64(originalHeight) * percentageChange)
 }
 
-func (r *Resizer) calculateNewWidth(originalWidth int, percentageChange float64) int {
+func (r Resizer) calculateNewWidth(originalWidth int, percentageChange float64) int {
 	return int(float64(originalWidth) * percentageChange)
 }
 
-func (r *Resizer) isValidImageFormat(contentType string) bool {
+func (r Resizer) isValidImageFormat(contentType string) bool {
 	validMIMETypes := []string{
 		"jpg",
 		"jpeg",
@@ -152,7 +178,7 @@ func (r *Resizer) isValidImageFormat(contentType string) bool {
 	return false
 }
 
-func (r *Resizer) getEncoderType(contentType string) string {
+func (r Resizer) getEncoderType(contentType string) string {
 	if strings.Contains(contentType, "jpg") || strings.Contains(contentType, "jpeg") {
 		return "jpg"
 	}

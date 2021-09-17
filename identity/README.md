@@ -2,16 +2,18 @@
 
 This package details with common identity-related issues, such as logging in and generating JWT tokens. It helps make the mundane tasks of creating and validating authentication tokens simpler. Here's a sample.
 
+## JWTService
+
 ```go
 package main
 
 import (
-   "github.com/app-nerds/identity"
-   "github.com/dgrijalva/jwt-go"
+   "github.com/app-nerds/kit/v6/identity"
+   "github.com/golang-jwt/jwt"
 )
 
 func main() {
-   jwtService := identity.NewJWTService(&identity.JWTServiceConfig{
+   jwtService := identity.NewJWTService(identity.JWTServiceConfig{
       AuthSalt: "salt",
       AuthSecret: "secret",
       Issuer: "issuer://com.some.domain",
@@ -19,7 +21,7 @@ func main() {
    })
 
    // Create a token
-   token, _ := jwtService.CreateToken(&identity.CreateTokenRequest{
+   token, _ := jwtService.CreateToken(identity.CreateTokenRequest{
       UserID: "user",
       UserName: "My Name",
       AdditionalData: map[string]interface{}{

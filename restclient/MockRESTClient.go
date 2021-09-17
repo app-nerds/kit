@@ -1,4 +1,4 @@
-package restclient2
+package restclient
 
 /*
 MockRESTClient is a mock for RESTClient

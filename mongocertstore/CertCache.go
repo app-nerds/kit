@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. App Nerds LLC. All rights reserved
+ * Copyright (c) 2021. App Nerds LLC. All rights reserved
  */
 
 package mongocertstore
@@ -8,7 +8,7 @@ import (
 	"context"
 	"time"
 
-	"github.com/app-nerds/kit/v5/database"
+	"github.com/app-nerds/kit/v6/database"
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
 	"golang.org/x/crypto/acme/autocert"
@@ -16,7 +16,7 @@ import (
 
 /*
 CertCache implements the autocert Cache interface and provides the ability
-to store SSL certs in the MongoDB. TODO: Add ability to mock Collection
+to store SSL certs in the MongoDB.
 */
 type CertCache struct {
 	Collection database.Collection

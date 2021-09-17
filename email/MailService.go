@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. App Nerds LLC. All rights reserved
+ * Copyright (c) 2021. App Nerds LLC. All rights reserved
  */
 
 package email
@@ -13,7 +13,7 @@ IMailService provides an interface describing a service for working with email
 */
 type IMailService interface {
 	Connect() error
-	Send(mail ...*Mail) error
+	Send(mail ...Mail) error
 }
 
 /*
@@ -51,7 +51,7 @@ func NewMailService(config *Config) *MailService {
 /*
 Connect establishes a connections to an SMTP server
 */
-func (s *MailService) Connect() error {
+func (s MailService) Connect() error {
 	var err error
 
 	s.Sender, err = s.Dialer.Dial()
@@ -61,7 +61,7 @@ func (s *MailService) Connect() error {
 /*
 Send sends an email
 */
-func (s *MailService) Send(mail ...*Mail) error {
+func (s MailService) Send(mail ...Mail) error {
 	mailItems := make([]*gomail.Message, len(mail))
 
 	for index := 0; index < len(mail); index++ {

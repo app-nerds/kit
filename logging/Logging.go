@@ -1,19 +1,19 @@
 /*
- * Copyright (c) 2020. App Nerds LLC. All rights reserved
+ * Copyright (c) 2021. App Nerds LLC. All rights reserved
  */
 
-package logging2
+package logging
 
 import (
-	fireplacehook "github.com/app-nerds/fireplace/cmd/fireplace-hook"
+	fireplacehook "github.com/app-nerds/fireplace/v2/cmd/fireplace-hook"
 	"github.com/sirupsen/logrus"
 )
 
 /*
-NewFireplaceLogger creates a new logrus logger with a Fireplace Server
+NewFireplaceLogger creates a new Logrus logger with a Fireplace Server
 hook installed
 */
-func NewFireplaceLogger(application, logLevel, fireplaceURL string, fields logrus.Fields) *logrus.Entry {
+func NewFireplaceLogger(application, logLevel, fireplaceURL, password string, fields logrus.Fields) *logrus.Entry {
 	var err error
 	var level logrus.Level
 
@@ -27,6 +27,7 @@ func NewFireplaceLogger(application, logLevel, fireplaceURL string, fields logru
 	logger.Logger.AddHook(fireplacehook.NewFireplaceHook(&fireplacehook.FireplaceHookConfig{
 		Application:  application,
 		FireplaceURL: fireplaceURL,
+		Password:     password,
 	}))
 
 	return logger

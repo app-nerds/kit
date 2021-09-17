@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. App Nerds LLC All Rights Reserved
+ * Copyright (c) 2021. App Nerds LLC All Rights Reserved
  */
 
 package captcha
@@ -12,6 +12,10 @@ import (
 	"time"
 )
 
+/*
+VerifyCaptchaResponse is the response from a Captcha verification
+request.
+*/
 type VerifyCaptchaResponse struct {
 	Success            bool      `json:"success"`
 	ChallengeTimestamp time.Time `json:"challenge_ts"`
@@ -19,6 +23,9 @@ type VerifyCaptchaResponse struct {
 	ErrorCodes         []string  `json:"error-codes"`
 }
 
+/*
+NewVerifyCaptchaResponseFromReader creates a new VerifyCaptchaResponse struct.
+*/
 func NewVerifyCaptchaResponseFromReader(reader io.Reader) (VerifyCaptchaResponse, error) {
 	var (
 		err    error

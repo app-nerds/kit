@@ -16,7 +16,7 @@ Get retrieves the HTTP response body. If the response is successful the body
 is written into "successReceiver". If not it is written into "errorReceiver".
 The type of value that is written depends on the response Content-Type.
 */
-func Get(response *http.Response, successReceiver, errorReceiver interface{}) (bool, error) {
+func Get(response *http.Response, successReceiver, errorReceiver interface{}) error {
 	contentType := response.Header.Get("Content-Type")
 	p := successReceiver
 
@@ -35,18 +35,16 @@ func isSuccess(response *http.Response) bool {
 	return response.StatusCode >= 200 && response.StatusCode < 300
 }
 
-func getJSON(response *http.Response, receiver interface{}) (bool, error) {
+func getJSON(response *http.Response, receiver interface{}) error {
 	b, _ := io.ReadAll(response.Body)
-	err := json.Unmarshal(b, receiver)
-
-	return err == nil, err
+	return json.Unmarshal(b, receiver)
 }
 
-func getString(response *http.Response, receiver interface{}) (bool, error) {
+func getString(response *http.Response, receiver interface{}) error {
 	b, _ := io.ReadAll(response.Body)
 
 	p := receiver.(*string)
 	*p = string(b)
 
-	return true, nil
+	return nil
 }

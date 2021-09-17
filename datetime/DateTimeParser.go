@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. App Nerds LLC. All rights reserved
+ * Copyright (c) 2021. App Nerds LLC. All rights reserved
  */
 
 package datetime
@@ -7,8 +7,6 @@ package datetime
 import (
 	"fmt"
 	"time"
-
-	"github.com/pkg/errors"
 )
 
 /*
@@ -25,6 +23,7 @@ type IDateTimeParser interface {
 	ParseISO8601SqlUtc(dateString string) time.Time
 	ParseShortDate(dateString string) time.Time
 	ParseUSDateTime(dateString string) time.Time
+	ParseUSDate(dateString string) time.Time
 	Pretty(t time.Time) string
 	ToISO8601(t time.Time) string
 	ToSQLString(t time.Time) string
@@ -36,6 +35,7 @@ type IDateTimeParser interface {
 	ValidShortDate(dateString string) bool
 	ValidISO8601SqlUtc(dateString string) bool
 	ValidUSDateTime(dateString string) bool
+	ValidUSDate(dateString string) bool
 }
 
 /*
@@ -46,13 +46,13 @@ type DateTimeParser struct{}
 /*
 DaysAgo returns the current date minus the number of specified days
 */
-func (service *DateTimeParser) DaysAgo(numDays int) (time.Time, error) {
+func (service DateTimeParser) DaysAgo(numDays int) (time.Time, error) {
 	var hoursAgo time.Duration
 	var err error
 
 	hoursAgoString := fmt.Sprintf("%dh", -24*numDays)
 	if hoursAgo, err = time.ParseDuration(hoursAgoString); err != nil {
-		return time.Now().UTC(), errors.Wrapf(err, "Unable to convert days to hours string")
+		return time.Now().UTC(), fmt.Errorf("Unable to convert days to hours string: %w", err)
 	}
 
 	result := time.Now().UTC().Add(hoursAgo)
@@ -62,7 +62,7 @@ func (service *DateTimeParser) DaysAgo(numDays int) (time.Time, error) {
 /*
 GetUTCLocation returns location information for the UTC timezone
 */
-func (service *DateTimeParser) GetUTCLocation() *time.Location {
+func (service DateTimeParser) GetUTCLocation() *time.Location {
 	return service.NowUTC().Location()
 }
 
@@ -70,7 +70,7 @@ func (service *DateTimeParser) GetUTCLocation() *time.Location {
 IsDateOlderThanNumDaysAgo returns true if the provided date is older
 than today minus the specified number of days. All times are UTC
 */
-func (service *DateTimeParser) IsDateOlderThanNumDaysAgo(t time.Time, numDays int) bool {
+func (service DateTimeParser) IsDateOlderThanNumDaysAgo(t time.Time, numDays int) bool {
 	hours := (24 * numDays) * -1
 	expiration := service.NowUTC().Add(time.Duration(hours) * time.Hour)
 	return t.Before(expiration)
@@ -79,7 +79,7 @@ func (service *DateTimeParser) IsDateOlderThanNumDaysAgo(t time.Time, numDays in
 /*
 NowUTC returns the current date/time in UTC
 */
-func (service *DateTimeParser) NowUTC() time.Time {
+func (service DateTimeParser) NowUTC() time.Time {
 	return time.Now().UTC()
 }
 
@@ -92,7 +92,7 @@ attempt to parse the string in the following formats:
   * Short Date (YYYY-MM-DD)
   * US Date/Time (MM/DD/YYYY H:MM A)
 */
-func (service *DateTimeParser) Parse(dateString string) (time.Time, error) {
+func (service DateTimeParser) Parse(dateString string) (time.Time, error) {
 	if service.ValidISO8601(dateString) {
 		return service.ParseISO8601(dateString), nil
 	}
@@ -113,13 +113,17 @@ func (service *DateTimeParser) Parse(dateString string) (time.Time, error) {
 		return service.ParseUSDateTime(dateString), nil
 	}
 
+	if service.ValidUSDate(dateString) {
+		return service.ParseUSDate(dateString), nil
+	}
+
 	return service.NowUTC(), fmt.Errorf("Unknown date/time format: %s", dateString)
 }
 
 /*
 ParseDateTime parses a string as a basic SQL date YYYY-MM-DDTHH:MM:SS
 */
-func (service *DateTimeParser) ParseDateTime(dateString string) time.Time {
+func (service DateTimeParser) ParseDateTime(dateString string) time.Time {
 	result, _ := time.Parse("2006-01-02T15:04:05", dateString)
 	return result
 }
@@ -128,7 +132,7 @@ func (service *DateTimeParser) ParseDateTime(dateString string) time.Time {
 ParseISO8601 parses a string as an ISO 8601 format YYYY-MM-DDTHH:MM:SS-07:00.
 The string must have the timezone indicated as an offset.
 */
-func (service *DateTimeParser) ParseISO8601(dateString string) time.Time {
+func (service DateTimeParser) ParseISO8601(dateString string) time.Time {
 	result, _ := time.Parse("2006-01-02T15:04:05-07:00", dateString)
 	return result
 }
@@ -137,7 +141,7 @@ func (service *DateTimeParser) ParseISO8601(dateString string) time.Time {
 ParseISO8601SqlUtc parses a string in SQL format with milliseconds and the
 UTC indicator YYYY-MM-DDTHH:MM:SS.000Z
 */
-func (service *DateTimeParser) ParseISO8601SqlUtc(dateString string) time.Time {
+func (service DateTimeParser) ParseISO8601SqlUtc(dateString string) time.Time {
 	result, _ := time.Parse("2006-01-02T15:04:05.999Z", dateString)
 	return result
 }
@@ -145,7 +149,7 @@ func (service *DateTimeParser) ParseISO8601SqlUtc(dateString string) time.Time {
 /*
 ParseShortDate parses a short date YYYY-MM-DD
 */
-func (service *DateTimeParser) ParseShortDate(dateString string) time.Time {
+func (service DateTimeParser) ParseShortDate(dateString string) time.Time {
 	result, _ := time.Parse("2006-01-02", dateString)
 	return result
 }
@@ -153,15 +157,23 @@ func (service *DateTimeParser) ParseShortDate(dateString string) time.Time {
 /*
 ParseUSDateTime parses a standard US date/time MM/DD/YYYY H:MM A
 */
-func (service *DateTimeParser) ParseUSDateTime(dateString string) time.Time {
+func (service DateTimeParser) ParseUSDateTime(dateString string) time.Time {
 	result, _ := time.Parse("01/02/2006 3:04 PM", dateString)
+	return result
+}
+
+/*
+ParseUSDate parses a standard US date MM/DD/YYYY
+*/
+func (service DateTimeParser) ParseUSDate(dateString string) time.Time {
+	result, _ := time.Parse("01/02/2006", dateString)
 	return result
 }
 
 /*
 Pretty returns a date/time formatted Jan 1 2010 at H:MMAM
 */
-func (service *DateTimeParser) Pretty(t time.Time) string {
+func (service DateTimeParser) Pretty(t time.Time) string {
 	var result string
 
 	result = t.Format("Jan _2 2006 at 3:04PM")
@@ -172,7 +184,7 @@ func (service *DateTimeParser) Pretty(t time.Time) string {
 ToISO8601 formats a time as YYYY-MM-DDTHH:MM:SS-07:00, using an offset
 to indicate timezone
 */
-func (service *DateTimeParser) ToISO8601(t time.Time) string {
+func (service DateTimeParser) ToISO8601(t time.Time) string {
 	return t.Format("2006-01-02T15:04:05-0700")
 }
 
@@ -180,35 +192,35 @@ func (service *DateTimeParser) ToISO8601(t time.Time) string {
 ToSQLString formats a time as YYYY-MM-DD HH:MM:SS. This is useful
 for inserting into a database
 */
-func (service *DateTimeParser) ToSQLString(t time.Time) string {
+func (service DateTimeParser) ToSQLString(t time.Time) string {
 	return t.Format("2006-01-02 15:04:05")
 }
 
 /*
 ToUSDate formats a time as MM/DD/YYYY
 */
-func (service *DateTimeParser) ToUSDate(t time.Time) string {
+func (service DateTimeParser) ToUSDate(t time.Time) string {
 	return t.Format("01/02/2006")
 }
 
 /*
 ToUSDateTime formats a time as MM/DD/YYYY H:MM AM
 */
-func (service *DateTimeParser) ToUSDateTime(t time.Time) string {
+func (service DateTimeParser) ToUSDateTime(t time.Time) string {
 	return t.Format("01/02/2006 3:04 PM")
 }
 
 /*
 ToUSTime formats a time as H:MM AM
 */
-func (service *DateTimeParser) ToUSTime(t time.Time) string {
+func (service DateTimeParser) ToUSTime(t time.Time) string {
 	return t.Format("3:04 PM")
 }
 
 /*
 ValidDateTime returns true if the string is YYYY-MM-DDTHH:MM:SS
 */
-func (service *DateTimeParser) ValidDateTime(dateString string) bool {
+func (service DateTimeParser) ValidDateTime(dateString string) bool {
 	if _, err := time.Parse("2006-01-02T15:04:05", dateString); err != nil {
 		return false
 	}
@@ -219,7 +231,7 @@ func (service *DateTimeParser) ValidDateTime(dateString string) bool {
 /*
 ValidISO8601 returns true if the string is YYYY-MM-DDTHH:MM:SS-07:00
 */
-func (service *DateTimeParser) ValidISO8601(dateString string) bool {
+func (service DateTimeParser) ValidISO8601(dateString string) bool {
 	if _, err := time.Parse("2006-01-02T15:04:05-07:00", dateString); err != nil {
 		return false
 	}
@@ -230,7 +242,7 @@ func (service *DateTimeParser) ValidISO8601(dateString string) bool {
 /*
 ValidShortDate returns true if the string is YYYY-MM-DD
 */
-func (service *DateTimeParser) ValidShortDate(dateString string) bool {
+func (service DateTimeParser) ValidShortDate(dateString string) bool {
 	if _, err := time.Parse("2006-01-02", dateString); err != nil {
 		return false
 	}
@@ -241,7 +253,7 @@ func (service *DateTimeParser) ValidShortDate(dateString string) bool {
 /*
 ValidISO8601SqlUtc returns true if the string is YYYY-MM-DDTHH:MM:SS.000Z
 */
-func (service *DateTimeParser) ValidISO8601SqlUtc(dateString string) bool {
+func (service DateTimeParser) ValidISO8601SqlUtc(dateString string) bool {
 	if _, err := time.Parse("2006-01-02T15:04:05.999Z", dateString); err != nil {
 		return false
 	}
@@ -252,8 +264,19 @@ func (service *DateTimeParser) ValidISO8601SqlUtc(dateString string) bool {
 /*
 ValidUSDateTime returns true if the string is MM/DD/YYYY H:MM AM
 */
-func (service *DateTimeParser) ValidUSDateTime(dateString string) bool {
+func (service DateTimeParser) ValidUSDateTime(dateString string) bool {
 	if _, err := time.Parse("01/02/2006 3:04 PM", dateString); err != nil {
+		return false
+	}
+
+	return true
+}
+
+/*
+ValidUSDate returns true if the string is MM/DD/YYYY
+*/
+func (service DateTimeParser) ValidUSDate(dateString string) bool {
+	if _, err := time.Parse("01/02/2006", dateString); err != nil {
 		return false
 	}
 

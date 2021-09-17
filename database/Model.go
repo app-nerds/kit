@@ -1,17 +1,17 @@
 /*
- * Copyright (c) 2020. App Nerds LLC. All rights reserved
+ * Copyright (c) 2021. App Nerds LLC. All rights reserved
  */
 
 package database
 
 import (
+	"fmt"
 	"io"
 	"path/filepath"
 	"time"
 
 	"github.com/globalsign/mgo"
 	"github.com/globalsign/mgo/bson"
-	"github.com/pkg/errors"
 )
 
 /*
@@ -465,7 +465,7 @@ func (u *MongoUploader) Upload(reader io.Reader, name, path string) (*DatabaseUp
 	 * Create the file in GridFS
 	 */
 	if file, err = u.DB.GridFS(path).Create(name); err != nil {
-		return result, errors.Wrapf(err, "Error uploading file '%s' to MongoDB GridFS", name)
+		return result, fmt.Errorf("Error uploading file '%s': %w", name, err)
 	}
 
 	defer file.Close()
@@ -480,7 +480,7 @@ func (u *MongoUploader) Upload(reader io.Reader, name, path string) (*DatabaseUp
 			if bytesRead > 0 {
 				if bytesWritten, err = file.Write(buffer); err != nil {
 					result.BytesWritten = bytesWritten
-					return result, errors.Wrapf(err, "Error writing file bytes to GridFS")
+					return result, fmt.Errorf("Error writing file bytes to GridFS: %w", err)
 				}
 
 				totalBytesWritten += bytesWritten

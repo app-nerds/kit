@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. App Nerds LLC All Rights Reserved
+ * Copyright (c) 2021. App Nerds LLC All Rights Reserved
  */
 
 package captcha
@@ -10,16 +10,22 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/app-nerds/kit/v5/restclient"
+	"github.com/app-nerds/kit/v6/restclient"
 )
 
+/*
+GoogleRecaptchaServiceConfig is used to configure a GoogleRecaptchaService
+*/
 type GoogleRecaptchaServiceConfig struct {
 	CaptchaSecret string
 }
 
+/*
+GoogleRecaptchaService provides methods for working with Google Recaptcha
+*/
 type GoogleRecaptchaService struct {
 	CaptchaSecret string
-	HttpClient    restclient.IHTTPClient
+	HttpClient    restclient.HTTPClientInterface
 }
 
 /*

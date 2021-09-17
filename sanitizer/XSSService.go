@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. App Nerds LLC. All rights reserved
+ * Copyright (c) 2021. App Nerds LLC. All rights reserved
  */
 package sanitizer
 
@@ -16,12 +16,12 @@ type XSSService struct {
 /*
 NewXSSService creates a new cross-site scripting service.
 */
-func NewXSSService() *XSSService {
+func NewXSSService() XSSService {
 	policy := bluemonday.UGCPolicy()
 	policy.AllowAttrs("align", "class", "style").OnElements("table", "div", "p", "section", "article", "header", "img", "span")
 	policy.AllowAttrs("width", "height", "src", "frameborder", "allowfullscreen").OnElements("iframe")
 
-	return &XSSService{
+	return XSSService{
 		sanitizer: policy,
 	}
 }
@@ -30,6 +30,6 @@ func NewXSSService() *XSSService {
 SanitizeString attempts to sanitize a string by removing potentially dangerous
 HTML/JS markup.
 */
-func (service *XSSService) SanitizeString(input string) string {
+func (service XSSService) SanitizeString(input string) string {
 	return service.sanitizer.Sanitize(input)
 }

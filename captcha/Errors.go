@@ -6,4 +6,5 @@ package captcha
 
 import "fmt"
 
+// ErrCaptchaFailed is returned when a CAPTCHA fails
 var ErrCaptchaFailed = fmt.Errorf("captcha failed")

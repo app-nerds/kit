@@ -2,7 +2,7 @@
  * Copyright (c) 2021. App Nerds LLC. All rights reserved
  */
 
-package restclient2
+package restclient
 
 import "net/http"
 
@@ -11,7 +11,6 @@ HTTPClientInterface is an interface over the Go HttpClient
 */
 type HTTPClientInterface interface {
 	Do(req *http.Request) (*http.Response, error)
-	SetTransport(transport *http.Transport)
 }
 
 /*

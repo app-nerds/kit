@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2020. App Nerds LLC. All rights reserved
+ * Copyright (c) 2021. App Nerds LLC. All rights reserved
  */
 
 package datetime_test
@@ -8,7 +8,7 @@ import (
 	"testing"
 	"time"
 
-	"github.com/app-nerds/kit/v5/datetime"
+	"github.com/app-nerds/kit/v6/datetime"
 )
 
 func TestDaysAgo(t *testing.T) {
@@ -86,6 +86,6 @@ func TestValidISO8601FailsWithBadDate(t *testing.T) {
 /******************************************************************************
  * Private methods
  *****************************************************************************/
-func getService() *datetime.DateTimeParser {
-	return &datetime.DateTimeParser{}
+func getService() datetime.DateTimeParser {
+	return datetime.DateTimeParser{}
 }
