@@ -4,11 +4,12 @@ package restclient
 MockRESTClient is a mock for RESTClient
 */
 type MockRESTClient struct {
-	DELETEFunc            func(path string, successReceiver, errorReceiver interface{}) (bool, error)
-	GETFunc               func(path string, successReceiver, errorReceiver interface{}) (bool, error)
-	POSTFunc              func(path string, body, successReceiver, errorReceiver interface{}) (bool, error)
-	PUTFunc               func(path string, body, successReceiver, errorReceiver interface{}) (bool, error)
-	WithAuthorizationFunc func(auth string) RESTClient
+	DELETEFunc             func(path string, successReceiver, errorReceiver interface{}) (bool, error)
+	GETFunc                func(path string, successReceiver, errorReceiver interface{}) (bool, error)
+	NewMultipartWriterFunc func() *MultipartWriter
+	POSTFunc               func(path string, body, successReceiver, errorReceiver interface{}) (bool, error)
+	PUTFunc                func(path string, body, successReceiver, errorReceiver interface{}) (bool, error)
+	WithAuthorizationFunc  func(auth string) RESTClient
 }
 
 /*
@@ -23,6 +24,13 @@ GET is a mock method
 */
 func (m MockRESTClient) GET(path string, successReceiver, errorReceiver interface{}) (bool, error) {
 	return m.GETFunc(path, successReceiver, errorReceiver)
+}
+
+/*
+NewMultipartWriter is a mock method
+*/
+func (m MockRESTClient) NewMultipartWriter() *MultipartWriter {
+	return m.NewMultipartWriterFunc()
 }
 
 /*

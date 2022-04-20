@@ -39,7 +39,7 @@ func NewJSONClient(baseURL string, httpClient HTTPClientInterface) JSONClient {
 }
 
 /*
-DELETE performs an HTTP DELETE operation. You provide a path, which should exclude 
+DELETE performs an HTTP DELETE operation. You provide a path, which should exclude
 the TLD, as this is defined in BaseURL. If your request requires authorization
 call WithAuthorization first, then DELETE.
 
@@ -95,7 +95,15 @@ func (c JSONClient) GET(path string, successReceiver, errorReceiver interface{})
 }
 
 /*
-POST performs an HTTP POST operation. You provide a path, which should exclude the
+NewMultipartWriter returns a MultipartWriter. This is used to POST and PUT multipart forms.
+Use this when you need to POST or PUT files, for example.
+*/
+func (c JSONClient) NewMultipartWriter() *MultipartWriter {
+	return NewMultipartWriter(c.BaseURL, c.HTTPClient, c.authorization)
+}
+
+/*
+POST performs an HTTP POST operation. You provide a path, which should exclude
 the TLD, as this is defined in BaseURL. If your request requires authorization
 call WithAuthorization first, then POST.
 
