@@ -47,7 +47,7 @@ if err != nil {
 	// Handle the error here
 }
 
-if response.Status > 299 {
+if response.StatusCode > 299 {
 	// Uh oh, non-success response. errorResponse contains whatever
 	// JSON came back
 }
@@ -72,7 +72,7 @@ if err != nil {
 	// Handle the error here
 }
 
-if response.Status > 299 {
+if response.StatusCode > 299 {
 	// Uh oh, non-success response. errorResponse contains whatever
 	// JSON came back
 }
@@ -80,7 +80,40 @@ if response.Status > 299 {
 // successResponse contains whatever JSON came back from success
 ```
 
-## POST
+### NewMultipartWriter
+
+NewMultipartWriter returns MultipartWriter component configured with the same base URL and authorization information as its parent JSONClient. This component is used to POST/PUT multipart forms. This is useful, for example, in performing operations like file uploads.
+
+```go
+successResponse := SuccessStruct{}
+errorResponse := ErrorStruct{}
+fp, _ := os.Open("/path/to/file")
+
+body := SomeStruct{
+	SomeKey1: "somevalue1",
+	SomeKey2: 2,
+}
+
+defer fp.Close()
+
+multipartWriter := client.NewMultipartWriter()
+
+_ = multipartWriter.AddField("field1", body)
+_ = multipartWriter.AddFile("file", "filenameHere", fp)
+
+// Doing a POST here. We also have PUT
+response, err = multipartWriter.POST("/thing", &successResponse, &errorResponse)
+
+if err != nil {
+	// Handle the error here
+}
+
+if response.StatusCode > 299 {
+	// Non-200 response. Do someething about it
+}
+```
+
+### POST
 
 POST performs an HTTP POST operation. You provide a path, which should exclude the TLD, as this is defined in BaseURL. The body of the post is an interface, allowing you to pass whatever you wish, and it will be serialized to JSON.
 
@@ -102,7 +135,7 @@ if err != nil {
 	// Handle the error here
 }
 
-if response.Status > 299 {
+if response.StatusCode > 299 {
 	// Uh oh, non-success response. errorResponse contains whatever
 	// JSON came back
 }
@@ -110,7 +143,7 @@ if response.Status > 299 {
 // successResponse contains whatever JSON came back from success
 ```
 
-## PUT
+### PUT
 
 PUT performs an HTTP PUT operation. You provide a path, which should exclude the TLD, as this is defined in BaseURL. The body of the put is an interface, allowing you to pass whatever you wish, and it will be serialized to JSON.
 
@@ -132,7 +165,7 @@ if err != nil {
 	// Handle the error here
 }
 
-if response.Status > 299 {
+if response.StatusCode > 299 {
 	// Uh oh, non-success response. errorResponse contains whatever
 	// JSON came back
 }
@@ -140,7 +173,7 @@ if response.Status > 299 {
 // successResponse contains whatever JSON came back from success
 ```
 
-## WithAuthorization
+### WithAuthorization
 
 **WithAuthorization** returns a copy of this JSONClient with the *Authorization* header set. Subsequent HTTP requests will send `Authorization: <auth>`, with *auth* being whatever you set in the string argument.
 
