@@ -8,6 +8,7 @@ here are designed to work across multiple applications and should not have any
 * [MongoDB Database](./database/README.md)
 * [Date/Time](./datetime/README.md)
 * [Email](./email/README.md)
+* [Filesystem](./filesystem/README.md)
 * [Identity](./identity/README.md)
 * [Images](./images/README.md)
 * [Logging](./logging/README.md)
