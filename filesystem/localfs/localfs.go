@@ -52,8 +52,20 @@ func NewLocalFS() filesystem.FileSystem {
 	return &LocalFS{}
 }
 
+func (lfs *LocalFS) Chdir(dir string) error {
+	return os.Chdir(dir)
+}
+
+func (lfs *LocalFS) Create(name string) (filesystem.WritableFile, error) {
+	return os.Create(name)
+}
+
 func (lfs *LocalFS) Mkdir(name string, perm fs.FileMode) error {
 	return os.Mkdir(name, perm)
+}
+
+func (lfs *LocalFS) MkdirAll(path string, perm fs.FileMode) error {
+	return os.MkdirAll(path, perm)
 }
 
 func (lfs *LocalFS) Open(name string) (fs.File, error) {

@@ -110,6 +110,14 @@ func NewMemoryFS() *MemoryFS {
 	}
 }
 
+func (mfs *MemoryFS) Chdir(dir string) error {
+	return nil
+}
+
+func (mfs *MemoryFS) Create(name string) (filesystem.WritableFile, error) {
+	return mfs.OpenFile(name, os.O_APPEND|os.O_CREATE, 0777)
+}
+
 func (mfs *MemoryFS) Mkdir(name string, perm fs.FileMode) error {
 	mfs.dirs = append(mfs.dirs, &DirEntry{
 		name:    name,
@@ -117,6 +125,10 @@ func (mfs *MemoryFS) Mkdir(name string, perm fs.FileMode) error {
 	})
 
 	return nil
+}
+
+func (mfs *MemoryFS) MkdirAll(path string, perm fs.FileMode) error {
+	return mfs.Mkdir(path, perm)
 }
 
 func (mfs *MemoryFS) Open(name string) (fs.File, error) {
