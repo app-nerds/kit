@@ -9,11 +9,22 @@ import (
 	"net/http"
 
 	"github.com/app-nerds/kit/v6/restclient/responsegetter"
+	"github.com/sirupsen/logrus"
 )
 
+type MultipartWriterConfig struct {
+	Authorization string
+	BaseURL       string
+	DebugMode     bool
+	HTTPClient    HTTPClientInterface
+	Logger        *logrus.Entry
+}
+
 type MultipartWriter struct {
-	BaseURL    string
-	HTTPClient HTTPClientInterface
+	baseURL    string
+	debugMode  bool
+	httpClient HTTPClientInterface
+	logger     *logrus.Entry
 
 	authorization string
 	writer        *multipart.Writer
@@ -23,11 +34,13 @@ type MultipartWriter struct {
 /*
 NewMultipartWriter creates a new MultipartWriter
 */
-func NewMultipartWriter(baseURL string, httpClient HTTPClientInterface, authorization string) *MultipartWriter {
+func NewMultipartWriter(config MultipartWriterConfig) *MultipartWriter {
 	result := &MultipartWriter{
-		BaseURL:       baseURL,
-		HTTPClient:    httpClient,
-		authorization: authorization,
+		baseURL:       config.BaseURL,
+		debugMode:     config.DebugMode,
+		httpClient:    config.HTTPClient,
+		logger:        config.Logger.WithField("component", "MultipartWriter"),
+		authorization: config.Authorization,
 	}
 
 	result.body = &bytes.Buffer{}
@@ -104,12 +117,12 @@ func (mw *MultipartWriter) POST(path string, successReceiver, errorReceiver inte
 		request.Header.Add("Authorization", mw.authorization)
 	}
 
-	if response, err = mw.HTTPClient.Do(request); err != nil {
+	if response, err = mw.httpClient.Do(request); err != nil {
 		return response, fmt.Errorf("error executing multipart POST request: %w", err)
 	}
 
 	defer response.Body.Close()
-	return response, responsegetter.Get(response, successReceiver, errorReceiver)
+	return response, responsegetter.Get(response, successReceiver, errorReceiver, mw.logger, mw.debugMode)
 }
 
 /*
@@ -136,14 +149,14 @@ func (mw *MultipartWriter) PUT(path string, successReceiver, errorReceiver inter
 		request.Header.Add("Authorization", mw.authorization)
 	}
 
-	if response, err = mw.HTTPClient.Do(request); err != nil {
+	if response, err = mw.httpClient.Do(request); err != nil {
 		return response, fmt.Errorf("error executing multipart PUT request: %w", err)
 	}
 
 	defer response.Body.Close()
-	return response, responsegetter.Get(response, successReceiver, errorReceiver)
+	return response, responsegetter.Get(response, successReceiver, errorReceiver, mw.logger, mw.debugMode)
 }
 
 func (mw *MultipartWriter) buildURL(path string) string {
-	return fmt.Sprintf("%s%s", mw.BaseURL, path)
+	return fmt.Sprintf("%s%s", mw.baseURL, path)
 }

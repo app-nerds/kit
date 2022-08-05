@@ -13,15 +13,28 @@ import (
 	"strings"
 
 	"github.com/app-nerds/kit/v6/restclient/responsegetter"
+	"github.com/sirupsen/logrus"
 )
+
+/*
+JSONClientConfig is used to configure a JSONClient struct
+*/
+type JSONClientConfig struct {
+	BaseURL    string
+	DebugMode  bool
+	HTTPClient HTTPClientInterface
+	Logger     *logrus.Entry
+}
 
 /*
 JSONClient provides a set of methods for working with RESTful endpoints that accept
 and return JSON data
 */
 type JSONClient struct {
-	BaseURL    string
-	HTTPClient HTTPClientInterface
+	baseURL    string
+	debugMode  bool
+	httpClient HTTPClientInterface
+	logger     *logrus.Entry
 
 	authorization string
 }
@@ -29,10 +42,12 @@ type JSONClient struct {
 /*
 NewJSONClient creates a new JSON-based REST client
 */
-func NewJSONClient(baseURL string, httpClient HTTPClientInterface) JSONClient {
+func NewJSONClient(config JSONClientConfig) JSONClient {
 	return JSONClient{
-		BaseURL:    baseURL,
-		HTTPClient: httpClient,
+		baseURL:    config.BaseURL,
+		debugMode:  config.DebugMode,
+		httpClient: config.HTTPClient,
+		logger:     config.Logger.WithField("component", "JSONClient"),
 
 		authorization: "",
 	}
@@ -58,12 +73,12 @@ func (c JSONClient) DELETE(path string, successReceiver, errorReceiver interface
 		return response, fmt.Errorf("error creating HTTP request: %w", err)
 	}
 
-	if response, err = c.HTTPClient.Do(request); err != nil {
+	if response, err = c.httpClient.Do(request); err != nil {
 		return response, fmt.Errorf("error executing request: %w", err)
 	}
 
 	defer response.Body.Close()
-	return response, responsegetter.Get(response, successReceiver, errorReceiver)
+	return response, responsegetter.Get(response, successReceiver, errorReceiver, c.logger, c.debugMode)
 }
 
 /*
@@ -86,12 +101,12 @@ func (c JSONClient) GET(path string, successReceiver, errorReceiver interface{})
 		return response, fmt.Errorf("error creating HTTP request: %w", err)
 	}
 
-	if response, err = c.HTTPClient.Do(request); err != nil {
+	if response, err = c.httpClient.Do(request); err != nil {
 		return response, fmt.Errorf("error executing request: %w", err)
 	}
 
 	defer response.Body.Close()
-	return response, responsegetter.Get(response, successReceiver, errorReceiver)
+	return response, responsegetter.Get(response, successReceiver, errorReceiver, c.logger, c.debugMode)
 }
 
 /*
@@ -99,7 +114,15 @@ NewMultipartWriter returns a MultipartWriter. This is used to POST and PUT multi
 Use this when you need to POST or PUT files, for example.
 */
 func (c JSONClient) NewMultipartWriter() *MultipartWriter {
-	return NewMultipartWriter(c.BaseURL, c.HTTPClient, c.authorization)
+	config := MultipartWriterConfig{
+		Authorization: c.authorization,
+		BaseURL:       c.baseURL,
+		DebugMode:     c.debugMode,
+		HTTPClient:    c.httpClient,
+		Logger:        c.logger,
+	}
+
+	return NewMultipartWriter(config)
 }
 
 /*
@@ -122,12 +145,12 @@ func (c JSONClient) POST(path string, body, successReceiver, errorReceiver inter
 		return response, fmt.Errorf("error creating HTTP request: %w", err)
 	}
 
-	if response, err = c.HTTPClient.Do(request); err != nil {
+	if response, err = c.httpClient.Do(request); err != nil {
 		return response, fmt.Errorf("error executing request: %w", err)
 	}
 
 	defer response.Body.Close()
-	return response, responsegetter.Get(response, successReceiver, errorReceiver)
+	return response, responsegetter.Get(response, successReceiver, errorReceiver, c.logger, c.debugMode)
 }
 
 /*
@@ -150,12 +173,12 @@ func (c JSONClient) PUT(path string, body, successReceiver, errorReceiver interf
 		return response, fmt.Errorf("error creating HTTP request: %w", err)
 	}
 
-	if response, err = c.HTTPClient.Do(request); err != nil {
+	if response, err = c.httpClient.Do(request); err != nil {
 		return response, fmt.Errorf("error executing request: %w", err)
 	}
 
 	defer response.Body.Close()
-	return response, responsegetter.Get(response, successReceiver, errorReceiver)
+	return response, responsegetter.Get(response, successReceiver, errorReceiver, c.logger, c.debugMode)
 }
 
 /*
@@ -164,15 +187,17 @@ header set
 */
 func (c JSONClient) WithAuthorization(auth string) RESTClient {
 	return JSONClient{
-		BaseURL:    c.BaseURL,
-		HTTPClient: c.HTTPClient,
+		baseURL:    c.baseURL,
+		debugMode:  c.debugMode,
+		httpClient: c.httpClient,
+		logger:     c.logger,
 
 		authorization: auth,
 	}
 }
 
 func (c JSONClient) buildURL(path string) string {
-	return fmt.Sprintf("%s%s", c.BaseURL, path)
+	return fmt.Sprintf("%s%s", c.baseURL, path)
 }
 
 func (c JSONClient) createRequest(path, method, authorization string, body interface{}) (*http.Request, error) {
@@ -205,6 +230,14 @@ func (c JSONClient) createRequest(path, method, authorization string, body inter
 
 	if authorization != "" {
 		request.Header.Add("Authorization", authorization)
+	}
+
+	if c.debugMode {
+		c.logger.WithFields(logrus.Fields{
+			"method":        upperMethod,
+			"url":           u,
+			"authorization": authorization,
+		}).Info("request created")
 	}
 
 	return request, nil
