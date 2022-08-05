@@ -20,14 +20,22 @@ As you can see this interface matches the Go *http.Client* struct, allowing you 
 
 ```go
 httpClient := &http.Client{} // Here you could use MockHTTPClient for unit tests
-client := restclient.NewJSONClient("http://localhost:8080", httpClient)
+
+config := restclient.JSONClientConfig{
+  BaseURL: "http://localhost:8080",
+  DebugMode: false,
+  HTTPClient: httpClient,
+  Logger: logrus.New().WithField("who", "restClient"),
+}
+
+client := restclient.NewJSONClient(config)
 ```
 
-If you want your requests to include an authorization header that would look like this.
+If you want your requests to include an authorization header return a new instance by calling **WithAuthorization**. Continuing from the code 
+sample above...
 
 ```go
-httpClient := &http.Client{} // Here you could use MockHTTPClient for unit tests
-client := restclient.NewJSONClient("http://localhost:8080", httpClient).WithAuthorization("Bearer " + token)
+client := client.WithAuthorization("Bearer " + token)
 ```
 
 ### DELETE
@@ -179,6 +187,15 @@ if response.StatusCode > 299 {
 
 ```go
 httpClient := &http.Client{} // Here you could use MockHTTPClient for unit tests
-client := restclient.NewJSONClient("http://localhost:8080", httpClient).WithAuthorization("Bearer " + token)
+
+config := restclient.JSONClientConfig{
+  BaseURL: "http://localhost:8080",
+  DebugMode: false,
+  HTTPClient: httpClient,
+  Logger: logrus.New().WithField("who", "restClient"),
+}
+
+client := restclient.NewJSONClient(config)
+client := client.WithAuthorization("Bearer " + token)
 ```
 
