@@ -9,7 +9,7 @@ require (
 	github.com/golang-jwt/jwt v3.2.2+incompatible
 	github.com/gorilla/mux v1.8.0
 	github.com/gorilla/sessions v1.2.1
-	github.com/labstack/echo/v4 v4.6.3
+	github.com/labstack/echo/v4 v4.9.0
 	github.com/markbates/goth v1.73.0
 	github.com/microcosm-cc/bluemonday v1.0.16
 	github.com/nfnt/resize v0.0.0-20180221191011-83c6a9932646
