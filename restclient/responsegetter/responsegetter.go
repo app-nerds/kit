@@ -6,6 +6,7 @@ package responsegetter
 
 import (
 	"encoding/json"
+	"encoding/xml"
 	"io"
 	"net/http"
 	"strings"
@@ -30,6 +31,10 @@ func Get(response *http.Response, successReceiver, errorReceiver interface{}, lo
 		return getJSON(response, p, logger.WithField("contentType", contentType), debugMode)
 	}
 
+	if strings.Contains(contentType, "xml") {
+		return getXML(response, p, logger.WithField("contentType", contentType), debugMode)
+	}
+
 	return getString(response, p, logger.WithField("contentType", contentType), debugMode)
 }
 
@@ -48,6 +53,19 @@ func getJSON(response *http.Response, receiver interface{}, logger *logrus.Entry
 	}
 
 	return json.Unmarshal(b, receiver)
+}
+
+func getXML(response *http.Response, receiver interface{}, logger *logrus.Entry, debugMode bool) error {
+	b, _ := io.ReadAll(response.Body)
+
+	if debugMode {
+		logger.WithFields(logrus.Fields{
+			"body":       string(b),
+			"statusCode": response.StatusCode,
+		}).Info("retrieved XML")
+	}
+
+	return xml.Unmarshal(b, receiver)
 }
 
 func getString(response *http.Response, receiver interface{}, logger *logrus.Entry, debugMode bool) error {
