@@ -20,10 +20,12 @@ import (
 JSONClientConfig is used to configure a JSONClient struct
 */
 type JSONClientConfig struct {
-	BaseURL    string
-	DebugMode  bool
-	HTTPClient HTTPClientInterface
-	Logger     *logrus.Entry
+	BaseURL         string
+	DebugMode       bool
+	HTTPClient      HTTPClientInterface
+	Logger          *logrus.Entry
+	CustomHeaders   map[string]string
+	OmitContentType bool
 }
 
 /*
@@ -31,10 +33,12 @@ JSONClient provides a set of methods for working with RESTful endpoints that acc
 and return JSON data
 */
 type JSONClient struct {
-	baseURL    string
-	debugMode  bool
-	httpClient HTTPClientInterface
-	logger     *logrus.Entry
+	baseURL         string
+	debugMode       bool
+	httpClient      HTTPClientInterface
+	logger          *logrus.Entry
+	customHeaders   map[string]string
+	omitContentType bool
 
 	authorization string
 }
@@ -44,10 +48,12 @@ NewJSONClient creates a new JSON-based REST client
 */
 func NewJSONClient(config JSONClientConfig) JSONClient {
 	return JSONClient{
-		baseURL:    config.BaseURL,
-		debugMode:  config.DebugMode,
-		httpClient: config.HTTPClient,
-		logger:     config.Logger.WithField("component", "JSONClient"),
+		baseURL:         config.BaseURL,
+		debugMode:       config.DebugMode,
+		httpClient:      config.HTTPClient,
+		logger:          config.Logger.WithField("component", "JSONClient"),
+		customHeaders:   config.CustomHeaders,
+		omitContentType: config.OmitContentType,
 
 		authorization: "",
 	}
@@ -106,6 +112,7 @@ func (c JSONClient) GET(path string, successReceiver, errorReceiver interface{})
 	}
 
 	defer response.Body.Close()
+
 	return response, responsegetter.Get(response, successReceiver, errorReceiver, c.logger, c.debugMode)
 }
 
@@ -226,10 +233,18 @@ func (c JSONClient) createRequest(path, method, authorization string, body inter
 		}
 	}
 
-	request.Header.Add("Content-Type", "application/json")
+	if !c.omitContentType {
+		request.Header.Add("Content-Type", "application/json")
+	}
 
 	if authorization != "" {
 		request.Header.Add("Authorization", authorization)
+	}
+
+	if c.customHeaders != nil {
+		for k, v := range c.customHeaders {
+			request.Header.Add(k, v)
+		}
 	}
 
 	if c.debugMode {
@@ -237,6 +252,7 @@ func (c JSONClient) createRequest(path, method, authorization string, body inter
 			"method":        upperMethod,
 			"url":           u,
 			"authorization": authorization,
+			"customHeaders": c.customHeaders,
 		}).Info("request created")
 	}
 
