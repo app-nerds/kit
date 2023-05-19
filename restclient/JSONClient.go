@@ -200,6 +200,7 @@ func (c JSONClient) WithAuthorization(auth string) RESTClient {
 		logger:     c.logger,
 
 		authorization: auth,
+		customHeaders: c.customHeaders,
 	}
 }
 
