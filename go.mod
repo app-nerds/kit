@@ -16,6 +16,7 @@ require (
 	github.com/oliamb/cutter v0.2.2
 	github.com/shirou/gopsutil v2.18.12+incompatible
 	github.com/sirupsen/logrus v1.8.1
+	go.uber.org/ratelimit v0.2.0
 	golang.org/x/crypto v0.0.0-20220214200702-86341886e292
 	gopkg.in/gomail.v2 v2.0.0-20160411212932-81ebce5c23df
 )
@@ -23,6 +24,7 @@ require (
 require (
 	cloud.google.com/go v0.81.0 // indirect
 	github.com/StackExchange/wmi v1.2.1 // indirect
+	github.com/andres-erbsen/clock v0.0.0-20160526145045-9e14626cd129 // indirect
 	github.com/aymerick/douceur v0.2.0 // indirect
 	github.com/go-ole/go-ole v1.2.5 // indirect
 	github.com/golang/protobuf v1.5.2 // indirect
