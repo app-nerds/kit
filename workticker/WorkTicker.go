@@ -14,7 +14,7 @@ type WorkTickerConfig[T any] struct {
 	NumWorkers         int
 	RateLimitPerSecond int
 	TickFrequency      time.Duration
-	WorkErrorChan      chan error
+	WorkErrorChan      chan HandleWorkError[T]
 	WorkConfiguration  WorkConfiguration[T]
 }
 
@@ -27,7 +27,7 @@ type WorkTicker[T any] struct {
 	logger            *logrus.Entry
 	numWorkers        int
 	tickFrequency     time.Duration
-	workErrorChan     chan error
+	workErrorChan     chan HandleWorkError[T]
 	workConfiguration WorkConfiguration[T]
 
 	workChan chan WorkItem[T]
@@ -94,7 +94,11 @@ func (wp *WorkTicker[T]) Run(ctx context.Context) {
 
 					if err = workItem.Handler(workerID, workItem.Data, wp.limiter); err != nil {
 						if wp.workChan != nil {
-							wp.workErrorChan <- err
+							wp.workErrorChan <- HandleWorkError[T]{
+								ErrorMessage: err.Error(),
+								WorkerID:     workerID,
+								Data:         workItem.Data,
+							}
 						}
 					}
 				}
