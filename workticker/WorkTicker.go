@@ -2,6 +2,7 @@ package workticker
 
 import (
 	"context"
+	"errors"
 	"sync"
 	"time"
 
@@ -113,6 +114,10 @@ func (wp *WorkTicker[T]) Run(ctx context.Context) {
 			select {
 			case <-ticker.C:
 				workItem, err := wp.workConfiguration.Retriever(wp.workConfiguration.Handler)
+
+				if err != nil && errors.Is(err, ErrNoWorkToRetrieve) {
+					continue
+				}
 
 				if err != nil {
 					wp.logger.WithError(err).Error("error retrieving work")
